@@ -7,9 +7,9 @@
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
 [![Version](https://img.shields.io/badge/Version-1.3.0-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
-**An improved [Villager Contracts](https://github.com/Invadermonky) fork by Invadermonky**
+**An improved [Villager Contracts](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) fork by Invadermonky**
 
-[Installation](https://www.google.com/search?q=%23installation) • [Features](https://www.google.com/search?q=%23features) • [Configuration](https://www.google.com/search?q=%23configuration) • [Compatibility](https://www.google.com/search?q=%23mod-integrations)
+[Installation](#installation) • [Features](#features) • [Configuration](#configuration) • [Compatibility](#mod-integrations)
 
 </div>
 
@@ -109,7 +109,6 @@ cd VillagerContractsExtended
 
 # For Windows users
 gradlew.bat build
-
 ```
 
 ---
