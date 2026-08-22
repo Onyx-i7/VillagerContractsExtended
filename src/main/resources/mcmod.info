@@ -5,12 +5,16 @@
   "description": "Adds an item that can change villager profession and career.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "https://www.curseforge.com/minecraft/mc-mods/villager-contracts",
-  "updateUrl": "",
+  "url": "https://github.com/Onyx-i7/VillagerContractsExtended",
+  "updateUrl": "https://raw.githubusercontent.com/Onyx-i7/VillagerContractsExtended/refs/heads/master/modupdatechecker.json",
   "authorList": ["Invadermonky", "Onyx_i7"],
   "credits": "Invadermonky",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
-}
+  "dependencies": [],
+  "modProperties": {
+      "issueTrackerUrl": "https://github.com/Onyx-i7/VillagerContractsExtended/issues",
+      "license": "MIT"
+    }
+  }
 ]
