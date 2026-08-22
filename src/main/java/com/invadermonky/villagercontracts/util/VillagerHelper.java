@@ -1,6 +1,5 @@
 package com.invadermonky.villagercontracts.util;
 
-import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -10,9 +9,15 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfessio
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VillagerHelper {
+
+    private static final Map<String, VillagerProfession> PROFESSION_CACHE = new HashMap<>();
+    private static final Map<VillagerProfession, List<VillagerCareer>> CAREERS_CACHE = new HashMap<>();
+    private static Field careersFieldCache = null;
 
     public static boolean doesVillagerExist(String professionName, String careerName) {
         return doesProfessionExist(professionName) && getCareer(getProfession(professionName), careerName) != null;
@@ -24,41 +29,46 @@ public class VillagerHelper {
 
     @Nullable
     public static VillagerProfession getProfession(String professionName) {
-        for (VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS) {
-            if(getProfessionName(profession).equalsIgnoreCase(professionName)) {
-                return profession;
+        return PROFESSION_CACHE.computeIfAbsent(professionName.toLowerCase(), name -> {
+            for (VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS) {
+                if (getProfessionName(profession).equalsIgnoreCase(name)) {
+                    return profession;
+                }
             }
-        }
-        return null;
+            return null;
+        });
     }
 
     public static String getProfessionName(VillagerProfession profession) {
-        try {
-            Field nameField = profession.getClass().getDeclaredField("name");
-            nameField.setAccessible(true);
-            return ((ResourceLocation) nameField.get(profession)).toString();
-        } catch (Exception e) {
-            LogHelper.error("Failed to retrieve profession name for profession: " + profession.getRegistryName().toString());
+        if (profession == null)
             return "";
-        }
+        ResourceLocation regName = profession.getRegistryName();
+        return regName != null ? regName.toString() : "";
     }
 
     @Nullable
     public static List<VillagerCareer> getProfessionCareers(VillagerProfession profession) {
-        try {
-            Field careersField = profession.getClass().getDeclaredField("careers");
-            careersField.setAccessible(true);
-            return (List<VillagerCareer>) careersField.get(profession);
-        } catch (Exception e) {
-            LogHelper.error("Error retrieving careers for villager profession: " + getProfessionName(profession));
+        if (profession == null)
             return null;
-        }
+
+        return CAREERS_CACHE.computeIfAbsent(profession, p -> {
+            try {
+                if (careersFieldCache == null) {
+                    careersFieldCache = p.getClass().getDeclaredField("careers");
+                    careersFieldCache.setAccessible(true);
+                }
+                return (List<VillagerCareer>) careersFieldCache.get(p);
+            } catch (Exception e) {
+                LogHelper.error("Error obtaining the courses for the profession: " + getProfessionName(profession));
+                return null;
+            }
+        });
     }
 
     @Nullable
     public static VillagerCareer getCareer(VillagerProfession profession, String careerName) {
         List<VillagerCareer> careers = getProfessionCareers(profession);
-        if(careers != null) {
+        if (careers != null) {
             for (VillagerCareer career : careers) {
                 if (getCareerName(career).equalsIgnoreCase(careerName)) {
                     return career;
@@ -74,33 +84,31 @@ public class VillagerHelper {
 
     public static int getCareerId(VillagerCareer career) {
         try {
-            Field careerIdField = career.getClass().getDeclaredField("id");
-            careerIdField.setAccessible(true);
-            return (int) careerIdField.get(career);
+            // Use reflection to obtain the race ID, as Forge 1.12.2 does not publicly
+            // expose this method
+            Field idField = career.getClass().getDeclaredField("id");
+            idField.setAccessible(true);
+            return (int) idField.get(career);
         } catch (Exception e) {
-            LogHelper.error("Error retrieving career id for career: " + getCareerName(career));
+            LogHelper.error("Error obtaining the career ID: " + getCareerName(career));
             return 0;
         }
     }
 
-    public static EntityVillager createVillager(@Nullable VillagerProfession profession, @Nullable VillagerCareer career, World world) {
-        if(profession != null && career != null) {
-            EntityVillager villager;
-            int loopControl = 0;
-            int careerId = getCareerId(career) + 1;
+    public static EntityVillager createVillager(@Nullable VillagerProfession profession,
+            @Nullable VillagerCareer career, World world) {
+        if (profession != null && career != null) {
+            EntityVillager villager = new EntityVillager(world);
+            villager.setProfession(profession);
 
-            while(loopControl < ConfigHandler.generateVillagerAttempts) {
-                villager = new EntityVillager(world);
-                villager.setProfession(profession);
-                villager.populateBuyingList();
+            // Assign the careerId directly thanks to the Access Transformer
+            // (villagercontracts_at.cfg)
+            villager.careerId = getCareerId(career) + 1;
 
-                if(villager.careerId == careerId) {
-                    return villager;
-                } else {
-                    loopControl++;
-                    villager.setDead();
-                }
-            }
+            // Generate the list of businesses for the new profession/career
+            villager.populateBuyingList();
+
+            return villager;
         }
         return new EntityVillager(world);
     }

@@ -1,0 +1,10 @@
+{
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/simpledifficulty-for-underdog/files",
+    "promos": {
+        "1.12.2-latest":        "1.3.0",
+        "1.12.2-recommended":   "1.3.0"
+    },
+    "1.12.2": {
+        "1.3.0": "Initial release of the fork without changes"
+	}
+}

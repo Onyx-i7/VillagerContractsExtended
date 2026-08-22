@@ -2,9 +2,24 @@
 config.villagercontracts:validcontracts=Valid Contracts
 
 # Items
-item.villagercontracts:contract.name=Villager Contract
+item.villagercontracts.contract.name=Villager Contract
+
+# Creative Tab
+itemGroup.villagercontracts=Villager Contracts
 
 # Tooltips
-tooltip.villagercontracts:desc=Rename at an anvil to specify villager career.
-tooltip.villagercontracts:info=Hold §bSHIFT§7 to display valid names.
-tooltip.villagercontracts:naming=Valid Contract Names:
+tooltip.villagercontracts.desc=Rename at an anvil to specify villager career.
+tooltip.villagercontracts.info=Hold §bSHIFT§r to display valid names.
+tooltip.villagercontracts.naming=Valid Contract Names:
+tooltip.villagercontracts.valid=§2Valid Contract§r
+tooltip.villagercontracts.invalid=§cInvalid Contract§r
+
+gui.villagercontracts.title=Villager Professions
+gui.villagercontracts.professions=Professions (by Mod)
+gui.villagercontracts.careers=Careers
+gui.villagercontracts.select_profession=< Select a profession
+gui.villagercontracts.select_career=< Select a career
+gui.villagercontracts.contract_name=Contract Name
+gui.villagercontracts.no_contract=You must be holding a Villager Contract
+gui.villagercontracts.applied=Applied name:
+tooltip.villagercontracts.rightclick=§bRight-click§r in the air to browse professions

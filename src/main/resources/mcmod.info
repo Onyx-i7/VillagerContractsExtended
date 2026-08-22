@@ -7,8 +7,8 @@
   "mcversion": "${mcversion}",
   "url": "https://www.curseforge.com/minecraft/mc-mods/villager-contracts",
   "updateUrl": "",
-  "authorList": ["Invadermonky"],
-  "credits": "Authors of this project",
+  "authorList": ["Invadermonky", "Onyx_i7"],
+  "credits": "Invadermonky",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []

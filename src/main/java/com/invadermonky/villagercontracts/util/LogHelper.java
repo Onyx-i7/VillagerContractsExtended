@@ -5,7 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LogHelper {
-    private static final Logger LOG = LogManager.getLogger(VillagerContracts.MOD_NAME);
+    private static final Logger LOG = LogManager.getLogger(VillagerContracts.MOD_ID);
+    
     public static void debug(Object obj) { LOG.debug(obj); }
     public static void error(Object obj) { LOG.error(obj); }
     public static void fatal(Object obj) { LOG.fatal(obj); }

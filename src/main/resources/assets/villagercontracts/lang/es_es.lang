@@ -1,0 +1,25 @@
+# Config
+config.villagercontracts:validcontracts=Contratos Válidos
+
+# Items
+item.villagercontracts.contract.name=Contrato de Aldeano
+
+# Creative Tab
+itemGroup.villagercontracts=Villager Contracts
+
+# Tooltips
+tooltip.villagercontracts.desc=Renómbralo en un yunque para especificar la profesión del aldeano.
+tooltip.villagercontracts.info=Mantén §bSHIFT§r para ver los nombres válidos.
+tooltip.villagercontracts.naming=Nombres de Contratos Válidos:
+tooltip.villagercontracts.valid=§2Contrato Válido§r
+tooltip.villagercontracts.invalid=§cContrato Inválido§r
+
+gui.villagercontracts.title=Profesiones de Aldeano
+gui.villagercontracts.professions=Profesiones (por Mod)
+gui.villagercontracts.careers=Carreras
+gui.villagercontracts.select_profession=< Selecciona una profesión
+gui.villagercontracts.select_career=< Selecciona una carrera
+gui.villagercontracts.contract_name=Nombre del Contrato
+gui.villagercontracts.no_contract=Debes sostener un Contrato de Aldeano
+gui.villagercontracts.applied=Nombre aplicado:
+tooltip.villagercontracts.rightclick=§bClick derecho§r en el aire para explorar profesiones
