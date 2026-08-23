@@ -1,16 +1,12 @@
 package com.invadermonky.villagercontracts.client.gui;
 
-import com.invadermonky.villagercontracts.VillagerContracts;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
@@ -28,9 +24,6 @@ import java.util.TreeMap;
  */
 public class GuiVillagerContracts extends GuiScreen {
 
-    private static final ResourceLocation BACKGROUND = new ResourceLocation(VillagerContracts.MOD_ID,
-            "textures/gui/contracts.png");
-
     private GuiTextField searchField;
     private final List<ProfessionEntry> professionList = new ArrayList<>();
     private final List<CareerEntry> careerList = new ArrayList<>();
@@ -39,6 +32,9 @@ public class GuiVillagerContracts extends GuiScreen {
     private int selectedCareerIndex = -1;
     private int professionScrollOffset = 0;
     private int careerScrollOffset = 0;
+
+    private long lastCareerClickTime = 0;
+    private int lastCareerClickIndex = -1;
 
     private final int maxVisibleEntries = 8;
 
@@ -242,6 +238,8 @@ public class GuiVillagerContracts extends GuiScreen {
                     updateCareerList();
                     selectedCareerIndex = -1;
                     careerScrollOffset = 0;
+                    lastCareerClickTime = 0;
+                    lastCareerClickIndex = -1;
                 }
             }
 
@@ -250,14 +248,16 @@ public class GuiVillagerContracts extends GuiScreen {
                 int relativeY = mouseY - (yCenter - 60);
                 int clickedIndex = careerScrollOffset + relativeY / 16;
                 if (clickedIndex >= 0 && clickedIndex < careerList.size()) {
-                    selectedCareerIndex = clickedIndex;
-                }
-            }
+                    long currentTime = System.currentTimeMillis();
 
-            // Double click on the career to apply the name to the contract
-            if (mouseX >= xCenter + 5 && mouseX <= xCenter + 135 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60
-                    && selectedCareerIndex >= 0 && selectedCareerIndex < careerList.size()) {
-                applyContractName(careerList.get(selectedCareerIndex).contractName);
+                    if (lastCareerClickIndex == clickedIndex && currentTime - lastCareerClickTime < 500) {
+                        applyContractName(careerList.get(clickedIndex).contractName);
+                    } else {
+                        selectedCareerIndex = clickedIndex;
+                        lastCareerClickTime = currentTime;
+                        lastCareerClickIndex = clickedIndex;
+                    }
+                }
             }
         }
     }

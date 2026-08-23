@@ -11,6 +11,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.item.ItemStack;
+import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardInputEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
@@ -19,6 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -30,6 +32,33 @@ public class EventHandler {
 
     public static Map<String, VillagerInfo> contractMap = new HashMap<>();
     public static Set<String> entityBlacklist = new HashSet<>();
+
+    // Cached reflection field for buyingList
+    private static Field buyingListField = null;
+
+    private static Field getBuyingListField() {
+        if (buyingListField == null) {
+            try {
+                buyingListField = EntityVillager.class.getDeclaredField("buyingList");
+                buyingListField.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException("Failed to access buyingList field", e);
+            }
+        }
+        return buyingListField;
+    }
+
+    private static void clearVillagerTrades(EntityVillager villager) {
+        try {
+            Field field = getBuyingListField();
+            MerchantRecipeList list = (MerchantRecipeList) field.get(villager);
+            if (list != null) {
+                list.clear();
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Failed to clear villager trades", e);
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onVillagerInteract(EntityInteract event) {
@@ -66,8 +95,10 @@ public class EventHandler {
                 // just as if the villager were new
                 villager.careerLevel = 1;
 
-                // Regenerate the list of trades for the new profession/career.
-                // populateBuyingList() clears the existing trades and generates new ones
+                // Clear existing trades using reflection to access the private buyingList field
+                clearVillagerTrades(villager);
+
+                // Regenerate the list of trades for the new profession/career
                 villager.populateBuyingList();
 
                 villager.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);

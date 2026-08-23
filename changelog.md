@@ -1,4 +1,8 @@
 # Villager Contracts Changelog
+## Version 1.3.1
+- Fix: Double-clicking in the GUI to select something on the right side
+- Fix: Villagers were not properly clearing out their shops
+
 ## Version 1.12.2-1.2.1
 - Fixed crash on dedicated servers
 
