@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=flat-square)](https://minecraft.net)
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
-[![Version](https://img.shields.io/badge/Version-1.3.0-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
+[![Version](https://img.shields.io/badge/Version-1.3.1-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
 **An improved [Villager Contracts](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) fork by Invadermonky**
 
