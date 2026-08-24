@@ -22,4 +22,4 @@ gui.villagercontracts.select_career=< Selecciona una carrera
 gui.villagercontracts.contract_name=Nombre del Contrato
 gui.villagercontracts.no_contract=Debes sostener un Contrato de Aldeano
 gui.villagercontracts.applied=Nombre aplicado:
-tooltip.villagercontracts.rightclick=§bClick derecho§r en el aire para explorar profesiones
+tooltip.villagercontracts.rightclick=§bClick derecho§r para explorar profesiones

@@ -21,14 +21,9 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class RegistryVC {
     public static Item villagerContract;
 
-    // Create a CreativeTab. When there are many mods installed, the "Misc" tab
-    // becomes unmanageable since having a dedicated tab greatly facilitates finding
-    // the item in creative mode
     public static final CreativeTabs TAB_VILLAGER_CONTRACTS = new CreativeTabs(VillagerContracts.MOD_ID) {
         @Override
         public ItemStack createIcon() {
-            // Use the contract item if it is already registered, or a backup item (Paper)
-            // to avoid NPE during the initial rendering
             if (villagerContract != null) {
                 return new ItemStack(villagerContract);
             }
@@ -40,11 +35,8 @@ public class RegistryVC {
     public static void registerItems(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
 
-        // Instantiate the item and assign it the CreativeTab
         villagerContract = new ItemVillagerContract("contract").setCreativeTab(TAB_VILLAGER_CONTRACTS);
         registry.register(villagerContract);
-
-        LogHelper.debug("Item Villager Contract registered correctly in its own tab");
     }
 
     @SideOnly(Side.CLIENT)
@@ -52,7 +44,5 @@ public class RegistryVC {
     public static void registerItemRenders(ModelRegistryEvent event) {
         ModelResourceLocation loc = new ModelResourceLocation(villagerContract.getRegistryName(), "inventory");
         ModelLoader.setCustomModelResourceLocation(villagerContract, 0, loc);
-
-        LogHelper.debug("Rendering of the registered item");
     }
 }

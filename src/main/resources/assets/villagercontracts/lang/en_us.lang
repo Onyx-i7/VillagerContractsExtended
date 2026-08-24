@@ -22,4 +22,4 @@ gui.villagercontracts.select_career=< Select a career
 gui.villagercontracts.contract_name=Contract Name
 gui.villagercontracts.no_contract=You must be holding a Villager Contract
 gui.villagercontracts.applied=Applied name:
-tooltip.villagercontracts.rightclick=§bRight-click§r in the air to browse professions
+tooltip.villagercontracts.rightclick=§bRight-click§r to browse professions

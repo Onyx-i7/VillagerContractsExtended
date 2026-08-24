@@ -1,4 +1,7 @@
 # Villager Contracts Changelog
+## Version 1.3.2
+- style: Added the mod's logo to mcmod.info
+- docs: Updated the repository's Readme.md using a better translator
 ## Version 1.3.1
 - Fix: Double-clicking in the GUI to select something on the right side
 - Fix: Villagers were not properly clearing out their shops

@@ -7,7 +7,7 @@
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
 [![Version](https://img.shields.io/badge/Version-1.3.1-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
-**An improved [Villager Contracts](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) fork by Invadermonky**
+**A fork of [VillagerContract](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) with some improvements**
 
 [Installation](#installation) • [Features](#features) • [Configuration](#configuration) • [Compatibility](#mod-integrations)
 
@@ -15,78 +15,59 @@
 
 ---
 
-## Overview
+## Description
 
-**Villager Contracts Extended** is a modernized and optimized fork for Minecraft 1.12.2. It rewrites and overhauls the villager profession changing system to fix severe incompatibilities in heavy modpacks. This fork focuses on improvements such as:
-
-* **Dedicated Graphical User Interface (GUI)** to eliminate problematic anvil mechanics when using large amounts of mods.
-* **Universal compatibility** with custom villagers added by any other mod.
-* **Bug fixes** and internal performance optimizations.
-* **Removal of legacy code** (obsolete tooltips and outdated mechanics).
+**Villager Contracts Extended** is a fork of Villager Contracts created by Invadermonky that adds several improvements to the original mod, such as general compatibility without having to configure the mod and an interface that makes it easy to select a villager's profession when there are a lot of mods installed
 
 ---
 
 ## Features
 
-### Interactive Interface (GUI)
-
-* **No More Anvils**: You no longer need to rename contracts in an anvil.
-* **Visual Menu**: Right-clicking while holding a contract opens a clean interface where you can clearly select any profession and career available in the game.
+### GUI
+***Texture currently under development***
+* **No More Anvil**: The tooltip and anvil system was a bit tedious when there were a lot of mods, causing it to sometimes disappear off the screen
+* **Menu**: Right-clicking while holding a contract opens a simple interface where you can easily select any profession or career available in the game
 
 ### Universal Compatibility
 
-* **Global Mod Support**: Automatically works out-of-the-box with any villager correctly registered through Minecraft Forge, regardless of which mod adds it.
+* **Global mod compatibility**: Works automatically right from the start with any villager properly registered through Minecraft Forge, regardless of which mod added them. This can be disabled via the blacklist or the mod's settings
 
-### Clean & Modernized System
+### Clean and Modernized System
 
-* **Tooltip Cleanup**: Completely removed the old tooltip system and anvil logic that caused bloated, oversized tooltips during development when loading large modpacks with many villager professions.
-* **Profession Reset**: Changes the villager's career and resets their trades cleanly and instantly *(currently slightly buggy)*.
+* **Cleanup of tooltips**: The old tooltip system and the anvil logic which caused tooltips to become too large and cumbersome when loading large mod packs with many villager professions during the development of this fork have been completely removed
+* **Reset Profession**: Changes the villager's profession and resets their trades
 
 ---
 
 ## Mod Integrations
 
-Thanks to the new detection system, this mod is **compatible out-of-the-box with any 1.12.2 villager mod**, including (and tested with):
+Thanks to the new detection system, this mod is **immediately compatible with any villager mod for version 1.12.2**, including (and tested with):
 
 * Vanilla Minecraft
 * Quark
 * Ice and Fire: ROTH Edition
 * Thaumcraft
 * Immersive Engineering
-* *And any other mod that properly registers villagers via Forge.*
+* *And any other mod that registers villagers through Forge*
 
 ---
 
 ## Configuration
 
-The configuration file allows you to tweak the mod's behavior to fit your modpack's needs:
+The configuration file allows you to adjust the mod's behavior to suit the needs of your modpack:
 
-* **`dumpVillagerInfo`**: When enabled, dumps all registered professions and careers into the log (useful for modpack creators).
-* **`entityBlacklist`**: A blacklist of entity IDs for which contract interactions are disabled.
-* **`validContracts`**: A whitelist to filter allowed names, professions, and careers.
-* **`autoDetectVillagersComment`**: Automatically detects all villager professions and careers registered by other mods.
-* **`consumeContractOnUseComment`**: Determines whether the Villager Contract is consumed upon applying it to a villager.
+* **`dumpVillagerInfo`**: When enabled, it logs all professions and careers listed in the registry (useful for modpack creators)
+* **`entityBlacklist`**: A blacklist of entity identifiers for which contractual interactions have been disabled. This is useful if you want to prevent a villager from a specific mod from being hired, this is accompanied by the previously mentioned configuration
+* **`validContracts`**: A whitelist for filtering allowed names, professions, and careers
+* **`autoDetectVillagersComment`**: Automatically detects all villager professions and careers registered by other mods. This is useful when you don't want to configure a lot of villagers
+* **`consumeContractOnUseComment`**: Determines whether the villager contract is consumed when applied to a villager
 
 ---
 
-## Installation
-
-### Requirements
-
-* **Minecraft**: 1.12.2
-* **Forge**: 14.23.5.2847 or higher
-* **Java**: 8
-
-### Steps
-
-1. **Download** the latest release from GitHub Releases, CurseForge, or Modrinth.
-2. **Locate** your Minecraft `mods` folder:
-* **Windows**: `%appdata%\.minecraft\mods`
-* **Linux**: `~/.minecraft/mods`
-
-
-3. **Copy** the downloaded `.jar` file into the `mods` folder.
-4. **Launch** Minecraft using your Forge profile.
+## Future Roadmap:
+* [ ] Port to future versions such as 1.16 or 1.21
+* [ ] Add more features, such as the experience cost of hiring a villager
+* [ ] And other features that will be added to this list
 
 ---
 
@@ -117,9 +98,11 @@ gradlew.bat build
 
 ### **License**
 
-This project is distributed under the **MIT License**.
+This project is distributed entirely under the **MIT License** and is based on the code from the base version of *Villager Contracts* by **Invadermonky**
+
+Since the original project was legitimately published under the MIT License, this fork remains fully open source and is permitted. Any subsequent forks or modifications of this project must continue to retain the original copyright notices and comply with the terms of the MIT License attached to this repository
 
 ### **Authors & Contributors**
 
-* **Invadermonky**: Creator of the original *Villager Contracts* mod.
-* **Onyx_i7**: Fork developer, performance optimizations, GUI, and maintenance
+* **Invadermonky**: Creator of the original *Villager Contracts* mod
+* **Onyx_i7**: Developer of this fork, responsible for performance optimizations, the GUI, and maintenance
