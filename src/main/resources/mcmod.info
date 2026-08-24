@@ -9,7 +9,7 @@
   "updateUrl": "https://raw.githubusercontent.com/Onyx-i7/VillagerContractsExtended/refs/heads/master/modupdatechecker.json",
   "authorList": ["Invadermonky", "Onyx_i7"],
   "credits": "Invadermonky",
-  "logoFile": "",
+  "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": [],
   "modProperties": {
