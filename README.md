@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=flat-square)](https://minecraft.net)
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
-[![Version](https://img.shields.io/badge/Version-1.3.1-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
+[![Version](https://img.shields.io/badge/Version-1.3.2-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
 **A fork of [VillagerContract](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) with some improvements**
 
@@ -61,12 +61,15 @@ The configuration file allows you to adjust the mod's behavior to suit the needs
 * **`validContracts`**: A whitelist for filtering allowed names, professions, and careers
 * **`autoDetectVillagersComment`**: Automatically detects all villager professions and careers registered by other mods. This is useful when you don't want to configure a lot of villagers
 * **`consumeContractOnUseComment`**: Determines whether the villager contract is consumed when applied to a villager
+* **`contractCostTypeComment`**: Determines the cost required to assign a contract to a villager
+* **`contractCostAmountComment`**: This is the number of XP or emerald levels required to create a contract. Soon it will be global, meaning you'll be able to assign any item to it
 
 ---
 
 ## Future Roadmap:
 * [ ] Port to future versions such as 1.16 or 1.21
-* [ ] Add more features, such as the experience cost of hiring a villager
+* [ ] Create the GUI texture
+* [x] Add more features, such as the experience cost of hiring a villager
 * [ ] And other features that will be added to this list
 
 ---

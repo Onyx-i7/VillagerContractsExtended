@@ -69,7 +69,6 @@ public class ItemVillagerContract extends Item {
                 tooltip.add(TextFormatting.RED + I18n.format(StringHelper.getLanguageKey("invalid", "tooltip")));
             }
         } else {
-            tooltip.add(I18n.format(StringHelper.getLanguageKey("desc", "tooltip")));
             tooltip.add(I18n.format(StringHelper.getLanguageKey("rightclick", "tooltip")));
         }
     }

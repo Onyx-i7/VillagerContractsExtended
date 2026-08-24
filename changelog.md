@@ -1,10 +1,16 @@
 # Villager Contracts Changelog
 ## Version 1.3.2
+- feat: A cost has now been added so that hiring a villager requires XP or Emeralds. This is optional and can be configured in the mod settings
+- feat(config)!: Added `contractCostTypeComment` and `contractCostAmountComment` to the configuration file
 - style: Added the mod's logo to mcmod.info
 - docs: Updated the repository's Readme.md using a better translator
+
 ## Version 1.3.1
 - Fix: Double-clicking in the GUI to select something on the right side
 - Fix: Villagers were not properly clearing out their shops
+
+## Version 1.3.0
+- Initial version of the fork
 
 ## Version 1.12.2-1.2.1
 - Fixed crash on dedicated servers

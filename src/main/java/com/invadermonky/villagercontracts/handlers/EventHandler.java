@@ -1,6 +1,8 @@
 package com.invadermonky.villagercontracts.handlers;
 
+import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.init.RegistryVC;
+import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiRepair;
@@ -8,6 +10,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.item.ItemStack;
@@ -33,7 +36,6 @@ public class EventHandler {
     public static Map<String, VillagerInfo> contractMap = new HashMap<>();
     public static Set<String> entityBlacklist = new HashSet<>();
 
-    // Cached reflection field for buyingList
     private static Field buyingListField = null;
 
     private static Field getBuyingListField() {
@@ -60,6 +62,58 @@ public class EventHandler {
         }
     }
 
+    private static boolean canPayCost(EntityPlayer player) {
+        ContractCostType costType = ConfigHandler.contractCostType;
+        int costAmount = ConfigHandler.contractCostAmount;
+
+        LogHelper.debug("Cost check - Type: " + costType + ", Amount: " + costAmount);
+
+        if (costType == ContractCostType.EXPERIENCE) {
+            LogHelper.debug("Player XP level: " + player.experienceLevel);
+            return player.experienceLevel >= costAmount;
+        } else if (costType == ContractCostType.EMERALDS) {
+            int emeraldCount = countEmeralds(player);
+            LogHelper.debug("Player emeralds: " + emeraldCount);
+            return emeraldCount >= costAmount;
+        }
+        // NONE means no cost
+        return true;
+    }
+
+    private static void payCost(EntityPlayer player) {
+        ContractCostType costType = ConfigHandler.contractCostType;
+        int costAmount = ConfigHandler.contractCostAmount;
+
+        if (costType == ContractCostType.EXPERIENCE) {
+            player.addExperienceLevel(-costAmount);
+        } else if (costType == ContractCostType.EMERALDS) {
+            consumeEmeralds(player, costAmount);
+        }
+    }
+
+    private static int countEmeralds(EntityPlayer player) {
+        int count = 0;
+        for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
+            ItemStack stack = player.inventory.getStackInSlot(i);
+            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
+    private static void consumeEmeralds(EntityPlayer player, int amount) {
+        int remaining = amount;
+        for (int i = 0; i < player.inventory.getSizeInventory() && remaining > 0; i++) {
+            ItemStack stack = player.inventory.getStackInSlot(i);
+            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+                int toRemove = Math.min(remaining, stack.getCount());
+                stack.shrink(toRemove);
+                remaining -= toRemove;
+            }
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onVillagerInteract(EntityInteract event) {
         EntityPlayer player = event.getEntityPlayer();
@@ -83,25 +137,21 @@ public class EventHandler {
                 VillagerInfo villagerInfo = contractMap.get(contractName);
                 EntityVillager villager = (EntityVillager) target;
 
-                // Modifies the existing entity in-place instead of destroying and recreating it
-                // This preserves the UUID, the position, the data from other mods, and avoids
-                // the error
-                // "Keeping entity that already exists with UUID" (This was a bug during the
-                // development of this fork)
+                if (!canPayCost(player)) {
+                    villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    event.setCanceled(true);
+                    return;
+                }
+
                 villager.setProfession(villagerInfo.profession);
                 villager.careerId = VillagerHelper.getCareerId(villagerInfo.career) + 1;
-
-                // Reset the career level to 1 so that the trades are generated from scratch,
-                // just as if the villager were new
                 villager.careerLevel = 1;
-
-                // Clear existing trades using reflection to access the private buyingList field
                 clearVillagerTrades(villager);
-
-                // Regenerate the list of trades for the new profession/career
                 villager.populateBuyingList();
 
                 villager.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
+
+                payCost(player);
 
                 player.swingArm(event.getHand());
                 if (ConfigHandler.consumeContractOnUse && !player.isCreative()) {

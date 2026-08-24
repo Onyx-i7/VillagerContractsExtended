@@ -1,11 +1,14 @@
 package com.invadermonky.villagercontracts.client.gui;
 
+import com.invadermonky.villagercontracts.handlers.ConfigHandler;
+import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
@@ -42,9 +45,6 @@ public class GuiVillagerContracts extends GuiScreen {
         rebuildLists();
     }
 
-    /**
-     * Rebuild the lists of professions and careers
-     */
     private void rebuildLists() {
         professionList.clear();
         Map<String, List<VillagerInfo>> grouped = new TreeMap<>();
@@ -75,7 +75,6 @@ public class GuiVillagerContracts extends GuiScreen {
         int xCenter = this.width / 2;
         int yCenter = this.height / 2;
 
-        // Search field at the top
         searchField = new GuiTextField(0, this.fontRenderer, xCenter - 120, yCenter - 95, 240, 16);
         searchField.setMaxStringLength(50);
         searchField.setEnableBackgroundDrawing(true);
@@ -91,38 +90,33 @@ public class GuiVillagerContracts extends GuiScreen {
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
-        // Semi-transparent background
         drawDefaultBackground();
 
         int xCenter = this.width / 2;
         int yCenter = this.height / 2;
 
-        // Draw the main panel (approximately 256x180)
-        drawRect(xCenter - 140, yCenter - 100, xCenter + 140, yCenter + 100, 0xCC000000);
-        drawRect(xCenter - 138, yCenter - 98, xCenter + 138, yCenter + 98, 0xFF3C3C3C);
+        // Primer rectángulo (borde exterior)
+        drawRect(xCenter - 140, yCenter - 100, xCenter + 140, yCenter + 113, 0xCC000000);
+        //         izquierdo      superior       derecho       inferior      color
 
-        // Title
+        // Segundo rectángulo (fondo interior)
+        drawRect(xCenter - 138, yCenter - 98, xCenter + 138, yCenter + 111, 0xFF3C3C3C);
+
         String title = TextFormatting.GOLD + I18n.format("gui.villagercontracts.title");
         drawCenteredString(this.fontRenderer, title, xCenter, yCenter - 110, 0xFFFFFF);
 
-        // Profession labels
         drawString(this.fontRenderer, TextFormatting.YELLOW + I18n.format("gui.villagercontracts.professions"),
                 xCenter - 135, yCenter - 75, 0xFFFFFF);
 
-        // Careers label
         drawString(this.fontRenderer, TextFormatting.YELLOW + I18n.format("gui.villagercontracts.careers"), xCenter + 5,
                 yCenter - 75, 0xFFFFFF);
 
         searchField.drawTextBox();
 
-        // Render the list of professions (left side)
         drawProfessionList(xCenter - 135, yCenter - 60, mouseX, mouseY);
-
-        // Render the list of careers (right side)
         drawCareerList(xCenter + 5, yCenter - 60, mouseX, mouseY);
-
-        // Information about the selected contract (below)
-        drawSelectedInfo(xCenter, yCenter + 75);
+        drawSelectedInfo(xCenter, yCenter + 65);
+        drawCostInfo(xCenter, yCenter + 90);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
@@ -139,12 +133,10 @@ public class GuiVillagerContracts extends GuiScreen {
             ProfessionEntry entry = filtered.get(dataIndex);
             int entryY = y + i * 16;
 
-            // Highlight if selected
             if (dataIndex == selectedProfessionIndex) {
                 drawRect(x - 2, entryY - 1, x + 130, entryY + 11, 0xFF505050);
             }
 
-            // Highlight when hovering the mouse
             if (mouseX >= x && mouseX <= x + 130 && mouseY >= entryY - 1 && mouseY <= entryY + 11) {
                 drawRect(x - 2, entryY - 1, x + 130, entryY + 11, 0x40FFFFFF);
             }
@@ -195,6 +187,48 @@ public class GuiVillagerContracts extends GuiScreen {
         drawCenteredString(this.fontRenderer, TextFormatting.WHITE + entry.contractName, xCenter, y + 12, 0xFFFFFF);
     }
 
+    private void drawCostInfo(int xCenter, int y) {
+        ContractCostType costType = ConfigHandler.contractCostType;
+        int costAmount = ConfigHandler.contractCostAmount;
+
+        if (costType == ContractCostType.NONE || costAmount <= 0) {
+            return;
+        }
+
+        boolean canAfford = false;
+        String costText = "";
+
+        if (costType == ContractCostType.EXPERIENCE) {
+            int playerXP = this.mc.player.experienceLevel;
+            canAfford = playerXP >= costAmount;
+            String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
+            costText = colorCode + I18n.format("gui.villagercontracts.cost_experience", costAmount, playerXP);
+        } else if (costType == ContractCostType.EMERALDS) {
+            int playerEmeralds = countEmeralds(this.mc.player);
+            canAfford = playerEmeralds >= costAmount;
+            String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
+            costText = colorCode + I18n.format("gui.villagercontracts.cost_emeralds", costAmount, playerEmeralds);
+        }
+
+        drawCenteredString(this.fontRenderer, costText, xCenter, y, 0xFFFFFF);
+
+        if (!canAfford) {
+            drawCenteredString(this.fontRenderer,
+                    TextFormatting.RED + I18n.format("gui.villagercontracts.insufficient_funds"), xCenter, y + 12, 0xFFFFFF);
+        }
+    }
+
+    private int countEmeralds(EntityPlayer player) {
+        int count = 0;
+        for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
+            ItemStack stack = player.inventory.getStackInSlot(i);
+            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+                count += stack.getCount();
+            }
+        }
+        return count;
+    }
+
     private List<ProfessionEntry> getFilteredProfessions() {
         String filter = searchField.getText().trim().toLowerCase(Locale.ROOT);
         if (filter.isEmpty())
@@ -225,14 +259,12 @@ public class GuiVillagerContracts extends GuiScreen {
             int xCenter = this.width / 2;
             int yCenter = this.height / 2;
 
-            // Click on the list of professions (left side)
             if (mouseX >= xCenter - 135 && mouseX <= xCenter - 5 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
                 int relativeY = mouseY - (yCenter - 60);
                 int clickedIndex = professionScrollOffset + relativeY / 16;
                 List<ProfessionEntry> filtered = getFilteredProfessions();
                 if (clickedIndex >= 0 && clickedIndex < filtered.size()) {
                     selectedProfessionIndex = filtered.indexOf(filtered.get(clickedIndex));
-                    // Use the original index of professionList to keep it consistent
                     ProfessionEntry selected = filtered.get(clickedIndex);
                     selectedProfessionIndex = professionList.indexOf(selected);
                     updateCareerList();
@@ -243,7 +275,6 @@ public class GuiVillagerContracts extends GuiScreen {
                 }
             }
 
-            // Click on the list of careers (right side)
             if (mouseX >= xCenter + 5 && mouseX <= xCenter + 135 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
                 int relativeY = mouseY - (yCenter - 60);
                 int clickedIndex = careerScrollOffset + relativeY / 16;
@@ -307,23 +338,16 @@ public class GuiVillagerContracts extends GuiScreen {
         super.keyTyped(typedChar, keyCode);
     }
 
-    /**
-     * Apply the selected name to the contract
-     * Use the package system so that it works on both the client side and the
-     * server side
-     */
     private void applyContractName(String name) {
         EntityPlayer player = this.mc.player;
         ItemStack held = player.getHeldItemMainhand();
 
-        // Verify that the player is holding a Villager Contract
         if (held.isEmpty() || held.getItem() != com.invadermonky.villagercontracts.init.RegistryVC.villagerContract) {
             player.sendMessage(new net.minecraft.util.text.TextComponentString(
                     TextFormatting.RED + I18n.format("gui.villagercontracts.no_contract")));
             return;
         }
 
-        // Send the package to the server to rename the item
         com.invadermonky.villagercontracts.network.PacketHandler.INSTANCE.sendToServer(
                 new com.invadermonky.villagercontracts.network.PacketApplyContractName(name));
 
@@ -346,7 +370,6 @@ public class GuiVillagerContracts extends GuiScreen {
         return false;
     }
 
-    // Auxiliary classes to structure the GUI data
     private static class ProfessionEntry {
         final String modId;
         final List<VillagerInfo> careers;

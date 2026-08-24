@@ -1,10 +1,12 @@
 package com.invadermonky.villagercontracts;
 
+import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.network.PacketHandler;
 import com.invadermonky.villagercontracts.proxy.CommonProxy;
 import com.invadermonky.villagercontracts.util.LogHelper;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -13,7 +15,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class VillagerContracts {
     public static final String MOD_ID = "villagercontracts";
     public static final String MOD_NAME = "Villager Contracts";
-    public static final String MOD_VERSION = "1.3.1";
+    public static final String MOD_VERSION = "1.3.2";
     public static final String MC_VERSION = "[1.12.2]";
 
     public static final String ProxyClientClass = "com.invadermonky.villagercontracts.proxy.ClientProxy";
@@ -31,6 +33,9 @@ public class VillagerContracts {
 
         // Register the network packets before any other initialization
         PacketHandler.init();
+
+        ConfigManager.sync(MOD_ID, net.minecraftforge.common.config.Config.Type.INSTANCE);
+        ConfigHandler.ConfigChangeListener.syncConfigValues();
 
         proxy.preInit(event);
         LogHelper.debug("PreInit phase completed");

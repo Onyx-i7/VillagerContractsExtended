@@ -71,8 +71,8 @@ public class PacketApplyContractName implements IMessage {
 
                 // Confirmation message to the player (TODO: Not sure whether to keep it or
                 // remove it)
-                player.sendMessage(new TextComponentString(
-                        TextFormatting.GREEN + "Contract renamed to: " + TextFormatting.WHITE + message.contractName));
+                //player.sendMessage(new TextComponentString(
+                //        TextFormatting.GREEN + "Contract renamed to: " + TextFormatting.WHITE + message.contractName));
 
                 // If the configuration says that the contract is consumed upon renaming, it
                 // consumes it

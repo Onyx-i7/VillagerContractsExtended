@@ -61,4 +61,14 @@ public class ReferencesVC {
                         "If it is enabled (true), the contract disappears after changing the villager's profession.\n"
                         +
                         "If it is disabled (false), the contract remains in hand and can be reused.";
+        public static final String contractCostTypeComment = "Determines the cost required to apply a contract to a villager.\n"
+                        +
+                        "Options: NONE (no cost), EXPERIENCE (requires XP levels), EMERALDS (requires emeralds)\n" +
+                        "Default: NONE";
+
+        public static final String contractCostAmountComment = "The amount of XP levels or emeralds required to apply a contract.\n"
+                        +
+                        "This setting is ignored if contractCostType is set to NONE\n" +
+                        "For EXPERIENCE: represents the number of XP levels consumed\n" +
+                        "For EMERALDS: represents the number of emeralds consumed";
 }

@@ -28,8 +28,15 @@ import java.util.regex.Pattern;
 
 @Config(modid = VillagerContracts.MOD_ID)
 public class ConfigHandler {
+
+    public enum ContractCostType {
+        NONE,
+        EXPERIENCE,
+        EMERALDS
+    }
+
     @Comment(ReferencesVC.disableAnvilRenamingComment)
-    public static boolean disableAnvilRenaming = false;
+    public static boolean disableAnvilRenaming = true;
 
     @Comment(ReferencesVC.dumpVillagerInfoComment)
     public static boolean dumpVillagerInfo = false;
@@ -41,15 +48,24 @@ public class ConfigHandler {
     @RangeInt(min = 1, max = 100)
     public static int generateVillagerAttempts = 20;
 
+    @Comment(ReferencesVC.consumeContractOnUseComment)
+    public static boolean consumeContractOnUse = true;
+
+    @Comment(ReferencesVC.contractCostTypeComment)
+    // Forge automatically creates a cycle button for enums: click to switch between
+    // values
+    public static ContractCostType contractCostType = ContractCostType.NONE;
+
+    @Comment(ReferencesVC.contractCostAmountComment)
+    @RangeInt(min = 1, max = 100)
+    public static int contractCostAmount = 1;
+
     @LangKey("config." + VillagerContracts.MOD_ID + ":validcontracts")
     @Comment(ReferencesVC.validContractsComment)
     public static String[] validContracts = ReferencesVC.defaultContracts;
 
     @Comment(ReferencesVC.entityBlacklistComment)
     public static String[] entityBlacklist = ReferencesVC.defaultBlacklist;
-
-    @Comment(ReferencesVC.consumeContractOnUseComment)
-    public static boolean consumeContractOnUse = true;
 
     private static final Pattern CONTRACT_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+?)\\s*;\\s*(.+)$");
 
@@ -73,14 +89,12 @@ public class ConfigHandler {
 
             EventHandler.contractMap.clear();
 
-            // First register the contracts defined manually in the config
             for (String configStr : validContracts) {
                 if (configStr != null && !configStr.trim().isEmpty()) {
                     parseConfiguredVillager(configStr.trim());
                 }
             }
 
-            // Then it automatically detects all the professions registered by other mods
             if (autoDetectVillagers) {
                 autoDetectAllVillagers();
             }
@@ -109,7 +123,7 @@ public class ConfigHandler {
         public static void parseConfiguredVillager(String configStr) {
             Matcher matcher = CONTRACT_PATTERN.matcher(configStr);
             if (!matcher.matches()) {
-                LogHelper.error("Invalid contract format. Expected: 'Name=Profession;Career'.  Received: " + configStr);
+                LogHelper.error("Invalid contract format. Expected: 'Name=Profession;Career'. Received: " + configStr);
             } else {
                 String identifier = matcher.group(1).trim();
                 String professionName = matcher.group(2).trim();
@@ -124,7 +138,6 @@ public class ConfigHandler {
                         LogHelper.error("Invalid career: " + careerName + " for profession " + professionName);
                     } else {
                         VillagerInfo info = new VillagerInfo(identifier, profession, career);
-                        // Manual definitions take precedence over automatic ones
                         EventHandler.contractMap.put(identifier.toLowerCase(Locale.ROOT), info);
                     }
                 }
@@ -132,15 +145,12 @@ public class ConfigHandler {
         }
 
         /**
-         * Automatically detects all professions and careers registered by other mods
-         * Generates contract names based on the name of the profession
+         * Automatically detects all professions and careers registered by other mods.
+         * Generates readable contract names based on the career name.
          */
         public static void autoDetectAllVillagers() {
-            // Track which names are already in use to detect collisions between mods
             Map<String, Integer> nameUsageCount = new HashMap<>();
-            Map<VillagerCareer, String> generatedNames = new HashMap<>();
 
-            // First pass: count how many mods use each career name
             for (VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS) {
                 List<VillagerCareer> careers = VillagerHelper.getProfessionCareers(profession);
                 if (careers == null)
@@ -153,7 +163,6 @@ public class ConfigHandler {
                 }
             }
 
-            // Second pass: generate names, adding the modid as a prefix if there are errors
             for (VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS) {
                 List<VillagerCareer> careers = VillagerHelper.getProfessionCareers(profession);
                 if (careers == null)
@@ -168,14 +177,12 @@ public class ConfigHandler {
 
                     String contractName;
                     if (nameUsageCount.getOrDefault(lowerName, 0) > 1) {
-                        // If there is a collision, add the mod name as a prefix
                         String prettyModName = prettifyName(modId);
                         contractName = prettyModName + " " + prettyName;
                     } else {
                         contractName = prettyName;
                     }
 
-                    // Only add the contract if it was not manually defined in the config
                     String lowerContract = contractName.toLowerCase(Locale.ROOT);
                     if (!EventHandler.contractMap.containsKey(lowerContract)) {
                         VillagerInfo info = new VillagerInfo(contractName, profession, career);
@@ -184,14 +191,9 @@ public class ConfigHandler {
                 }
             }
 
-            LogHelper.info("Auto-detected " + EventHandler.contractMap.size() + " villager contracts in total");
+            LogHelper.info("Auto-detected " + EventHandler.contractMap.size() + " villager contracts in total.");
         }
 
-        /**
-         * Convert a name like "weapon_smith" or "modid.weapon_smith" to "Weapon Smith"
-         * This handles both the format with ":" (ResourceLocation) and with "."
-         * (modid.name)
-         */
         private static String prettifyName(String rawName) {
             if (rawName == null || rawName.isEmpty())
                 return rawName;
