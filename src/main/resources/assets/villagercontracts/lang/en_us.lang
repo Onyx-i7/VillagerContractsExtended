@@ -1,18 +1,15 @@
-# Config
-config.villagercontracts:validcontracts=Valid Contracts
+# Cooldown messages
+message.villagercontracts.cooldown_slavery=The villager refuses to work! You can't have a slave! (Wait: %s)
+message.villagercontracts.cooldown_rest=The villager needs a rest. Come back in %s
+message.villagercontracts.cooldown_tired=The villager looks exhausted. Please wait %s
+message.villagercontracts.cooldown_union=Villager Union says: No more overtime! Wait %s
+message.villagercontracts.cooldown_boss=The villager says: I'm not your employee! Wait %s
 
-# Items
-item.villagercontracts.contract.name=Villager Contract
+# General messages
+message.villagercontracts.insufficient_funds=You don't have enough resources to apply this contract!
+message.villagercontracts.contract_applied=%s is now a %s!
 
-# Creative Tab
-itemGroup.villagercontracts=Villager Contracts
-
-# Tooltips
-tooltip.villagercontracts.info=Hold SHIFT to display valid names
-tooltip.villagercontracts.naming=Valid Contract Names:
-tooltip.villagercontracts.valid=Valid Contract
-tooltip.villagercontracts.invalid=Invalid Contract
-
+# GUI
 gui.villagercontracts.title=Villager Professions
 gui.villagercontracts.professions=Professions
 gui.villagercontracts.careers=Careers
@@ -20,8 +17,21 @@ gui.villagercontracts.select_profession=< Select a profession
 gui.villagercontracts.select_career=< Select a career
 gui.villagercontracts.contract_name=Contract Name
 gui.villagercontracts.no_contract=You must be holding a Villager Contract
-gui.villagercontracts.applied=Applied name:
+gui.villagercontracts.cost_none=No cost
 gui.villagercontracts.cost_experience=Cost: %s XP levels (You have: %s)
-gui.villagercontracts.cost_emeralds=Cost: %s emeralds (You have: %s)
+gui.villagercontracts.cost_item=Cost: %s %s (You have: %s)
+gui.villagercontracts.cost_item_not_found=Configured cost item not found!
 gui.villagercontracts.insufficient_funds=Insufficient resources!
+
+# Tooltips
+tooltip.villagercontracts.desc=Rename at an anvil or right-click to specify villager career
 tooltip.villagercontracts.rightclick=Right-click to browse professions
+tooltip.villagercontracts.valid=Valid Contract
+tooltip.villagercontracts.invalid=Invalid Contract
+
+# Items
+item.villagercontracts.contract.name=Villager Contract
+itemGroup.villagercontracts=Villager Contracts
+
+# Game Stages messages
+message.villagercontracts.stage_required=You need the Game Stage '%s' to use contracts!

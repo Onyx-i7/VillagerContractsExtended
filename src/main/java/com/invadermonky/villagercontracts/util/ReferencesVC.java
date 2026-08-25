@@ -25,50 +25,95 @@ public class ReferencesVC {
                         "toroquest:toroquest_toro_villager"
         };
 
-        public static final String disableAnvilRenamingComment = "Enabling this option will disable contract renaming in the forge and remove the associated tooltip.\n"
+        public static final String disableAnvilRenamingComment = "Enabling this will disable contract renaming at an anvil and remove the associated tooltip.\n"
                         +
-                        "If this is enabled, you will need to create custom recipes for named contracts using CraftTweaker (stack.withDisplayName) or similar.";
+                        "If this is enabled you will need to create custom recipes for named contracts using CraftTweaker's \"stack.withDisplayName(String name)\" function or something similar.";
 
-        public static final String dumpVillagerInfoComment = "Print the names of the profession and career of all the villagers registered in the log (latest.log).\n"
+        public static final String dumpVillagerInfoComment = "Prints the profession and career names of all registered villagers"
                         +
-                        "Very useful for discovering the correct names of villagers added by other mods.\n" +
-                        "This dump will occur when restarting the game and every time you change the settings from the game menu.";
+                        " to the log. This dump will occur on game restart and after the configuration has been changed in-game.";
 
-        public static final String generateVillagerAttemptsComment = "[OBSOLETE] This value is no longer used thanks to recent code optimizations, but it is maintained for compatibility with old configurations.";
+        public static final String autoDetectVillagersComment = "Automatically detects all professions and careers registered by other mods.\n"
+                        +
+                        "When enabled, the mod will generate readable contract names for each profession without needing\n"
+                        +
+                        "to configure them manually. Contracts defined in 'validContracts' take priority.";
+
+        public static final String generateVillagerAttemptsComment = "This value is no longer used due to recent code optimizations, but is kept for compatibility with old configurations.";
+
+        public static final String consumeContractOnUseComment = "Determines whether the Villager Contract is consumed when applied to a villager.\n"
+                        +
+                        "If enabled (true), the contract disappears after changing the villager's profession.\n" +
+                        "If disabled (false), the contract remains in the hand and can be reused.";
+
+        public static final String contractCostTypeComment = "Determines the cost required to apply a contract to a villager.\n"
+                        +
+                        "Options:\n" +
+                        "  NONE - No cost required\n" +
+                        "  EXPERIENCE - Requires XP levels\n" +
+                        "  ITEM - Requires the item specified in 'contractCostItem'\n" +
+                        "Default: NONE";
+
+        public static final String contractCostAmountComment = "The amount of XP levels or items required to apply a contract.\n"
+                        +
+                        "This setting is ignored if contractCostType is set to NONE.\n" +
+                        "For EXPERIENCE: represents the number of XP levels consumed.\n" +
+                        "For ITEM: represents the number of items consumed from the player's inventory.";
+
+        public static final String contractCostItemComment = "The item ID to use as cost when contractCostType is set to ITEM.\n"
+                        +
+                        "Examples: 'minecraft:diamond', 'minecraft:emerald', 'botania:manasteel_ingot'\n" +
+                        "Default: minecraft:emerald";
+
+        public static final String enableCooldownComment = "When enabled, villagers will have a cooldown period after a contract is applied.\n"
+                        +
+                        "During the cooldown, you cannot apply another contract to the same villager.\n" +
+                        "This prevents exploiting villagers by rapidly changing their professions.\n" +
+                        "Default: false";
+
+        public static final String cooldownTicksComment = "The cooldown duration in ticks after applying a contract to a villager.\n"
+                        +
+                        "20 ticks = 1 second. 1200 ticks = 1 minute. 72000 ticks = 1 hour. 1728000 ticks = 1 day.\n" +
+                        "This setting is ignored if enableCooldown is false.\n" +
+                        "Default: 24000 (20 minutes real time)";
+
+        public static final String autoNameVillagersComment = "When enabled, villagers will be automatically renamed when a contract is applied.\n"
+                        +
+                        "The name will match the contract identifier (which can be customized in the config).\n" +
+                        "Example: Applying a 'Librarian' contract will rename the villager to 'Librarian'.\n" +
+                        "Default: false";
+
+        public static final String overrideCustomNamesComment = "When enabled, the contract will override any custom name the villager already has\n"
+                        +
+                        "(including names set with name tags).\n" +
+                        "When disabled, villagers with custom names will keep their original names.\n" +
+                        "This setting is ignored if autoNameVillagers is false.\n" +
+                        "Default: false";
 
         public static final String validContractsComment = "List of valid contract names and their associated villager careers.\n"
                         +
-                        "Format: name=profession;career\n" +
-                        "  name - The exact name you must give to the contract in the forge (case insensitive).\n"
+                        "Format:  name=profession;career\n" +
+                        "  name - The name used when renaming the villager contract to specify the desired career. These names are case-insensitive but must be unique, though multiple names can be assigned for the same villager career.\n"
                         +
-                        "  profession - The registration ID of the profession (e.g., minecraft:farmer). Find these IDs using 'dumpVillagerInfo'.\n"
+                        "  profession - The villager profession resource location. Can be found using the \"dumpVillagerInfo\" config option.\n"
                         +
-                        "  career - The name of the career associated with the profession.  Find these names using 'dumpVillagerInfo'.\n\n"
+                        "  career - The villager career name. Career must be associated with the profession and can be found using the \"dumpVillagerInfo\" config option.\n\n"
                         +
-                        "NOTE: Villagers from other mods that do not use the standard Forge registry will not work with these contracts.";
+                        "NOTE:\n" +
+                        "  Modded villagers that are not registered with Forge's VillagerProfession registry will not work with these contracts.\n"
+                        +
+                        "  Villagers with custom models may generate their correct trades, but will default to the farmer texture.";
 
-        public static final String entityBlacklistComment = "Blacklist of villager entity IDs with which the contract MUST NOT interact.\n"
-                        +
-                        "Useful for avoiding conflicts with entities that appear to be villagers but are not (e.g., Plague Doctors from the Rats mod).";
+        public static final String entityBlacklistComment = "Blacklist of any villager entity ids where contract interactions should be disabled.";
 
-        public static final String autoDetectVillagersComment = "Automatically detects all villager professions and careers registered by other mods.\n"
+        public static final String enableGameStagesComment = "When enabled, players will need a specific Game Stage to apply contracts.\n"
                         +
-                        "When enabled, the mod will generate readable contract names for each profession without the need\n"
-                        +
-                        "to configure them manually.  The contracts defined in 'validContracts' take precedence.";
-        public static final String consumeContractOnUseComment = "Determine if the Villager Contract is consumed when applied to a villager.\n"
-                        +
-                        "If it is enabled (true), the contract disappears after changing the villager's profession.\n"
-                        +
-                        "If it is disabled (false), the contract remains in hand and can be reused.";
-        public static final String contractCostTypeComment = "Determines the cost required to apply a contract to a villager.\n"
-                        +
-                        "Options: NONE (no cost), EXPERIENCE (requires XP levels), EMERALDS (requires emeralds)\n" +
-                        "Default: NONE";
+                        "This requires the Game Stages mod by Darkhax to be installed.\n" +
+                        "If Game Stages is not installed, this setting is ignored.\n" +
+                        "Default: false";
 
-        public static final String contractCostAmountComment = "The amount of XP levels or emeralds required to apply a contract.\n"
-                        +
-                        "This setting is ignored if contractCostType is set to NONE\n" +
-                        "For EXPERIENCE: represents the number of XP levels consumed\n" +
-                        "For EMERALDS: represents the number of emeralds consumed";
+        public static final String requiredGameStageComment = "The Game Stage required to apply contracts.\n" +
+                        "Only used when enableGameStages is true and Game Stages mod is installed.\n" +
+                        "Example: 'contract_master', 'advanced_trader'\n" +
+                        "Default: contract_master";
 }

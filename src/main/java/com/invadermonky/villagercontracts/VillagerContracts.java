@@ -1,21 +1,29 @@
 package com.invadermonky.villagercontracts;
 
+import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.network.PacketHandler;
 import com.invadermonky.villagercontracts.proxy.CommonProxy;
 import com.invadermonky.villagercontracts.util.LogHelper;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = VillagerContracts.MOD_ID, name = VillagerContracts.MOD_NAME, version = VillagerContracts.MOD_VERSION, acceptedMinecraftVersions = VillagerContracts.MC_VERSION)
+@Mod(
+        modid = VillagerContracts.MOD_ID,
+        name = VillagerContracts.MOD_NAME,
+        version = VillagerContracts.MOD_VERSION,
+        acceptedMinecraftVersions = VillagerContracts.MC_VERSION,
+        dependencies = "required-after:forge@[14.23.5.2847,);" +
+                       "after:gamestages"
+)
 public class VillagerContracts {
     public static final String MOD_ID = "villagercontracts";
     public static final String MOD_NAME = "Villager Contracts";
-    public static final String MOD_VERSION = "1.3.2";
+    public static final String MOD_VERSION = "1.3.3";
     public static final String MC_VERSION = "[1.12.2]";
 
     public static final String ProxyClientClass = "com.invadermonky.villagercontracts.proxy.ClientProxy";
@@ -31,25 +39,26 @@ public class VillagerContracts {
     public void preInit(FMLPreInitializationEvent event) {
         LogHelper.info("Starting " + MOD_NAME);
 
-        // Register the network packets before any other initialization
         PacketHandler.init();
 
         ConfigManager.sync(MOD_ID, net.minecraftforge.common.config.Config.Type.INSTANCE);
         ConfigHandler.ConfigChangeListener.syncConfigValues();
 
+        GameStageIntegration.initialize();
+
         proxy.preInit(event);
-        LogHelper.debug("PreInit phase completed");
+        LogHelper.debug("Finished preInit phase.");
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         proxy.init(event);
-        LogHelper.debug("Init phase completed");
+        LogHelper.debug("Finished init phase.");
     }
 
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
-        LogHelper.debug("PostInit phase completed");
+        LogHelper.debug("Finished postInit phase.");
     }
 }

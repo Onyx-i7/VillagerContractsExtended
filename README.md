@@ -5,11 +5,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=flat-square)](https://minecraft.net)
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
-[![Version](https://img.shields.io/badge/Version-1.3.2-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
+[![Version](https://img.shields.io/badge/Version-1.3.3-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
 **A fork of [VillagerContract](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) with some improvements**
 
-[Installation](#installation) • [Features](#features) • [Configuration](#configuration) • [Compatibility](#mod-integrations)
+[Features](#features) • [Configuration](#configuration) • [Compatibility](#mod-integrations)
 
 </div>
 
@@ -24,7 +24,9 @@
 ## Features
 
 ### GUI
+
 ***Texture currently under development***
+
 * **No More Anvil**: The tooltip and anvil system was a bit tedious when there were a lot of mods, causing it to sometimes disappear off the screen
 * **Menu**: Right-clicking while holding a contract opens a simple interface where you can easily select any profession or career available in the game
 
@@ -48,6 +50,7 @@ Thanks to the new detection system, this mod is **immediately compatible with an
 * Ice and Fire: ROTH Edition
 * Thaumcraft
 * Immersive Engineering
+* Gamestage (Compatibility requested by small_raman88 and added in version 1.3.3)
 * *And any other mod that registers villagers through Forge*
 
 ---
@@ -66,7 +69,8 @@ The configuration file allows you to adjust the mod's behavior to suit the needs
 
 ---
 
-## Future Roadmap:
+## Future Roadmap
+
 * [ ] Port to future versions such as 1.16 or 1.21
 * [ ] Create the GUI texture
 * [x] Add more features, such as the experience cost of hiring a villager

@@ -1,8 +1,10 @@
 package com.invadermonky.villagercontracts.handlers;
 
+import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.init.RegistryVC;
 import com.invadermonky.villagercontracts.util.LogHelper;
+import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiRepair;
@@ -10,16 +12,19 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardInputEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -28,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class EventHandler {
@@ -37,6 +43,15 @@ public class EventHandler {
     public static Set<String> entityBlacklist = new HashSet<>();
 
     private static Field buyingListField = null;
+    private static final Random random = new Random();
+
+    private static final String[] COOLDOWN_MESSAGES = {
+            "message.villagercontracts.cooldown_slavery",
+            "message.villagercontracts.cooldown_rest",
+            "message.villagercontracts.cooldown_tired",
+            "message.villagercontracts.cooldown_union",
+            "message.villagercontracts.cooldown_boss"
+    };
 
     private static Field getBuyingListField() {
         if (buyingListField == null) {
@@ -66,17 +81,16 @@ public class EventHandler {
         ContractCostType costType = ConfigHandler.contractCostType;
         int costAmount = ConfigHandler.contractCostAmount;
 
-        LogHelper.debug("Cost check - Type: " + costType + ", Amount: " + costAmount);
-
         if (costType == ContractCostType.EXPERIENCE) {
-            LogHelper.debug("Player XP level: " + player.experienceLevel);
             return player.experienceLevel >= costAmount;
-        } else if (costType == ContractCostType.EMERALDS) {
-            int emeraldCount = countEmeralds(player);
-            LogHelper.debug("Player emeralds: " + emeraldCount);
-            return emeraldCount >= costAmount;
+        } else if (costType == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getCostItem();
+            if (costItem == null) {
+                return false;
+            }
+            int itemCount = countItem(player, costItem);
+            return itemCount >= costAmount;
         }
-        // NONE means no cost
         return true;
     }
 
@@ -86,27 +100,30 @@ public class EventHandler {
 
         if (costType == ContractCostType.EXPERIENCE) {
             player.addExperienceLevel(-costAmount);
-        } else if (costType == ContractCostType.EMERALDS) {
-            consumeEmeralds(player, costAmount);
+        } else if (costType == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getCostItem();
+            if (costItem != null) {
+                consumeItem(player, costItem, costAmount);
+            }
         }
     }
 
-    private static int countEmeralds(EntityPlayer player) {
+    private static int countItem(EntityPlayer player, Item item) {
         int count = 0;
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
             ItemStack stack = player.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+            if (!stack.isEmpty() && stack.getItem() == item) {
                 count += stack.getCount();
             }
         }
         return count;
     }
 
-    private static void consumeEmeralds(EntityPlayer player, int amount) {
+    private static void consumeItem(EntityPlayer player, Item item, int amount) {
         int remaining = amount;
         for (int i = 0; i < player.inventory.getSizeInventory() && remaining > 0; i++) {
             ItemStack stack = player.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+            if (!stack.isEmpty() && stack.getItem() == item) {
                 int toRemove = Math.min(remaining, stack.getCount());
                 stack.shrink(toRemove);
                 remaining -= toRemove;
@@ -114,7 +131,7 @@ public class EventHandler {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
+        @SubscribeEvent(priority = EventPriority.HIGH)
     public void onVillagerInteract(EntityInteract event) {
         EntityPlayer player = event.getEntityPlayer();
         if (player == null)
@@ -136,8 +153,41 @@ public class EventHandler {
             if (contractMap.containsKey(contractName)) {
                 VillagerInfo villagerInfo = contractMap.get(contractName);
                 EntityVillager villager = (EntityVillager) target;
+                long currentTime = world.getTotalWorldTime();
+
+                if (ConfigHandler.enableGameStages && GameStageIntegration.isAvailable()) {
+                    if (!GameStageIntegration.hasRequiredStage(player, ConfigHandler.requiredGameStage)) {
+                        TextComponentTranslation msg = new TextComponentTranslation(
+                                "message.villagercontracts.stage_required", ConfigHandler.requiredGameStage);
+                        msg.getStyle().setColor(TextFormatting.RED);
+                        player.sendMessage(msg);
+                        villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                        event.setCanceled(true);
+                        return;
+                    }
+                }
+
+                if (ConfigHandler.enableCooldown
+                        && VillagerDataHelper.isOnCooldown(villager, currentTime, ConfigHandler.cooldownTicks)) {
+                    long remaining = VillagerDataHelper.getRemainingCooldown(villager, currentTime,
+                            ConfigHandler.cooldownTicks);
+                    String formattedTime = VillagerDataHelper.formatCooldownTime(remaining);
+
+                    String messageKey = COOLDOWN_MESSAGES[random.nextInt(COOLDOWN_MESSAGES.length)];
+                    TextComponentTranslation msg = new TextComponentTranslation(messageKey, formattedTime);
+                    msg.getStyle().setColor(TextFormatting.RED);
+                    player.sendMessage(msg);
+
+                    villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                    event.setCanceled(true);
+                    return;
+                }
 
                 if (!canPayCost(player)) {
+                    TextComponentTranslation msg = new TextComponentTranslation(
+                            "message.villagercontracts.insufficient_funds");
+                    msg.getStyle().setColor(TextFormatting.RED);
+                    player.sendMessage(msg);
                     villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
                     event.setCanceled(true);
                     return;
@@ -149,9 +199,27 @@ public class EventHandler {
                 clearVillagerTrades(villager);
                 villager.populateBuyingList();
 
+                if (ConfigHandler.autoNameVillagers) {
+                    boolean shouldRename = !villager.hasCustomName() || ConfigHandler.overrideCustomNames;
+                    if (shouldRename) {
+                        villager.setCustomNameTag(villagerInfo.identifier);
+                        villager.setAlwaysRenderNameTag(true);
+                    }
+                }
+
+                if (ConfigHandler.enableCooldown) {
+                    VillagerDataHelper.setLastContractTime(villager, currentTime);
+                }
+
                 villager.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
 
                 payCost(player);
+
+                String villagerDisplayName = villager.hasCustomName() ? villager.getCustomNameTag() : villagerInfo.identifier;
+                TextComponentTranslation successMsg = new TextComponentTranslation(
+                        "message.villagercontracts.contract_applied", villagerDisplayName, villagerInfo.identifier);
+                successMsg.getStyle().setColor(TextFormatting.GREEN);
+                player.sendMessage(successMsg);
 
                 player.swingArm(event.getHand());
                 if (ConfigHandler.consumeContractOnUse && !player.isCreative()) {

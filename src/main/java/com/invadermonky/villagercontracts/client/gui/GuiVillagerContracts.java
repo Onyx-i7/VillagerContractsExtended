@@ -3,12 +3,14 @@ package com.invadermonky.villagercontracts.client.gui;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
+import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
@@ -97,7 +99,7 @@ public class GuiVillagerContracts extends GuiScreen {
 
         // Primer rectángulo (borde exterior)
         drawRect(xCenter - 140, yCenter - 100, xCenter + 140, yCenter + 113, 0xCC000000);
-        //         izquierdo      superior       derecho       inferior      color
+        // izquierdo superior derecho inferior color
 
         // Segundo rectángulo (fondo interior)
         drawRect(xCenter - 138, yCenter - 98, xCenter + 138, yCenter + 111, 0xFF3C3C3C);
@@ -203,26 +205,39 @@ public class GuiVillagerContracts extends GuiScreen {
             canAfford = playerXP >= costAmount;
             String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
             costText = colorCode + I18n.format("gui.villagercontracts.cost_experience", costAmount, playerXP);
-        } else if (costType == ContractCostType.EMERALDS) {
-            int playerEmeralds = countEmeralds(this.mc.player);
-            canAfford = playerEmeralds >= costAmount;
-            String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
-            costText = colorCode + I18n.format("gui.villagercontracts.cost_emeralds", costAmount, playerEmeralds);
+        } else if (costType == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getCostItem();
+            if (costItem != null) {
+                int playerItemCount = countItem(this.mc.player, costItem);
+                canAfford = playerItemCount >= costAmount;
+                String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
+
+                String itemName = new ItemStack(costItem).getDisplayName();
+                costText = colorCode
+                        + I18n.format("gui.villagercontracts.cost_item", costAmount, itemName, playerItemCount);
+            } else {
+                costText = TextFormatting.RED + I18n.format("gui.villagercontracts.cost_item_not_found");
+            }
         }
 
         drawCenteredString(this.fontRenderer, costText, xCenter, y, 0xFFFFFF);
 
-        if (!canAfford) {
+        // Show warning if player cannot afford the cost
+        if (!canAfford && costType != ContractCostType.NONE) {
             drawCenteredString(this.fontRenderer,
-                    TextFormatting.RED + I18n.format("gui.villagercontracts.insufficient_funds"), xCenter, y + 12, 0xFFFFFF);
+                    TextFormatting.RED + I18n.format("gui.villagercontracts.insufficient_funds"), xCenter, y + 12,
+                    0xFFFFFF);
         }
     }
 
-    private int countEmeralds(EntityPlayer player) {
+    /**
+     * Count the total number of a specific item in the player's inventory.
+     */
+    private int countItem(EntityPlayer player, Item item) {
         int count = 0;
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
             ItemStack stack = player.inventory.getStackInSlot(i);
-            if (!stack.isEmpty() && stack.getItem() == Items.EMERALD) {
+            if (!stack.isEmpty() && stack.getItem() == item) {
                 count += stack.getCount();
             }
         }

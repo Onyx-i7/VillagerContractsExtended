@@ -5,6 +5,8 @@ import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.ReferencesVC;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.Config.Comment;
 import net.minecraftforge.common.config.Config.LangKey;
@@ -32,11 +34,11 @@ public class ConfigHandler {
     public enum ContractCostType {
         NONE,
         EXPERIENCE,
-        EMERALDS
+        ITEM
     }
 
     @Comment(ReferencesVC.disableAnvilRenamingComment)
-    public static boolean disableAnvilRenaming = true;
+    public static boolean disableAnvilRenaming = false;
 
     @Comment(ReferencesVC.dumpVillagerInfoComment)
     public static boolean dumpVillagerInfo = false;
@@ -52,13 +54,33 @@ public class ConfigHandler {
     public static boolean consumeContractOnUse = true;
 
     @Comment(ReferencesVC.contractCostTypeComment)
-    // Forge automatically creates a cycle button for enums: click to switch between
-    // values
     public static ContractCostType contractCostType = ContractCostType.NONE;
 
     @Comment(ReferencesVC.contractCostAmountComment)
     @RangeInt(min = 1, max = 100)
     public static int contractCostAmount = 1;
+
+    @Comment(ReferencesVC.contractCostItemComment)
+    public static String contractCostItem = "minecraft:emerald";
+
+    @Comment(ReferencesVC.enableCooldownComment)
+    public static boolean enableCooldown = false;
+
+    @Comment(ReferencesVC.cooldownTicksComment)
+    @RangeInt(min = 100, max = 1728000)
+    public static int cooldownTicks = 24000;
+
+    @Comment(ReferencesVC.autoNameVillagersComment)
+    public static boolean autoNameVillagers = false;
+
+    @Comment(ReferencesVC.overrideCustomNamesComment)
+    public static boolean overrideCustomNames = false;
+
+    @Comment(ReferencesVC.enableGameStagesComment)
+    public static boolean enableGameStages = false;
+
+    @Comment(ReferencesVC.requiredGameStageComment)
+    public static String requiredGameStage = "contract_master";
 
     @LangKey("config." + VillagerContracts.MOD_ID + ":validcontracts")
     @Comment(ReferencesVC.validContractsComment)
@@ -68,6 +90,29 @@ public class ConfigHandler {
     public static String[] entityBlacklist = ReferencesVC.defaultBlacklist;
 
     private static final Pattern CONTRACT_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+?)\\s*;\\s*(.+)$");
+
+    private static Item cachedCostItem = null;
+    private static String cachedCostItemId = null;
+
+    public static Item getCostItem() {
+        if (contractCostType != ContractCostType.ITEM) {
+            return null;
+        }
+
+        if (cachedCostItem != null && contractCostItem.equals(cachedCostItemId)) {
+            return cachedCostItem;
+        }
+
+        ResourceLocation itemId = new ResourceLocation(contractCostItem);
+        cachedCostItem = ForgeRegistries.ITEMS.getValue(itemId);
+        cachedCostItemId = contractCostItem;
+
+        if (cachedCostItem == null) {
+            LogHelper.error("Configured cost item not found: " + contractCostItem);
+        }
+
+        return cachedCostItem;
+    }
 
     @Mod.EventBusSubscriber(modid = VillagerContracts.MOD_ID)
     public static class ConfigChangeListener {
@@ -144,10 +189,6 @@ public class ConfigHandler {
             }
         }
 
-        /**
-         * Automatically detects all professions and careers registered by other mods.
-         * Generates readable contract names based on the career name.
-         */
         public static void autoDetectAllVillagers() {
             Map<String, Integer> nameUsageCount = new HashMap<>();
 

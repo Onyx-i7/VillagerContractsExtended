@@ -13,7 +13,7 @@ plugins {
 version = project.mod_version
 group = project.maven_group
 base {
-    archivesName = "Villagercontracts"
+    archivesName = "VillagerContracts"
 }
 
 // Set the toolchain version to decouple the Java we run Gradle with from the Java used to compile and run the mod
@@ -123,6 +123,10 @@ dependencies {
         }
     }
 
+    // Game Stages
+    compileOnly rfg.deobf('curse.maven:game-stages-268655:2951840')
+    // Bookshelf
+    compileOnly rfg.deobf('curse.maven:bookshelf-228525:2836960')
 }
 
 // Adds Access Transformer files to tasks
