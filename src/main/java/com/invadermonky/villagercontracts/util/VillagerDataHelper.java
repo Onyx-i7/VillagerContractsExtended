@@ -2,6 +2,8 @@ package com.invadermonky.villagercontracts.util;
 
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
+import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
 /**
  * Helper class for managing villager NBT data related to the contract system.
@@ -66,5 +68,19 @@ public class VillagerDataHelper {
         }
 
         return result.toString().trim();
+    }
+
+    public static String getProfessionName(VillagerProfession profession) {
+        if (profession == null || profession.getRegistryName() == null) {
+            return "minecraft:unknown";
+        }
+        return profession.getRegistryName().toString();
+    }
+
+    public static String getCareerName(VillagerCareer career) {
+        if (career == null) {
+            return "unknown";
+        }
+        return career.getName();
     }
 }

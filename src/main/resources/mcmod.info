@@ -1,20 +1,24 @@
 [
-{
-  "modid": "${modid}",
-  "name": "${name}",
-  "description": "Adds an item that can change villager profession and career.",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "url": "https://github.com/Onyx-i7/VillagerContractsExtended",
-  "updateUrl": "https://raw.githubusercontent.com/Onyx-i7/VillagerContractsExtended/refs/heads/master/modupdatechecker.json",
-  "authorList": ["Invadermonky", "Onyx_i7"],
-  "credits": "Invadermonky",
-  "logoFile": "logo.png",
-  "screenshots": [],
-  "dependencies": [],
-  "modProperties": {
-      "issueTrackerUrl": "https://github.com/Onyx-i7/VillagerContractsExtended/issues",
-      "license": "MIT"
+    {
+        "modid": "${modid}",
+        "name": "${name}",
+        "description": "A fork of VillagerContracts with improvements and compatibility fixes. This mod adds an item that lets you change a villager’s profession to another which is useful when you have many mods installed and the villager you want doesn’t appear\n\nIf you find a bug, please report it on CurseForge or GitHub so I can continue improving the mod. If you have any suggestions, please let me know I’d be happy to include them in an update",
+        "version": "${version}",
+        "mcversion": "1.12.2",
+        "url": "https://www.curseforge.com/minecraft/mc-mods/villagercontracts-extended",
+        "updateUrl": "https://raw.githubusercontent.com/Onyx-i7/VillagerContractsExtended/refs/heads/master/modupdatechecker.json",
+        "updateJSON": "",
+        "authorList": [
+            "Invadermonky",
+            "Onyx_i7"
+        ],
+        "credits": "Credit to Invadermonky for creating this mod",
+        "logoFile": "logo.png",
+        "screenshots": [],
+        "dependencies": [],
+        "modProperties": {
+          "issueTrackerUrl": "https://github.com/Onyx-i7/VillagerContractsExtended/issues",
+          "license": "MIT"
+        }
     }
-  }
 ]

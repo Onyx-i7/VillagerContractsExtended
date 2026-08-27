@@ -1,5 +1,12 @@
 # Villager Contracts Changelog
 
+## Version 1.3.4
+
+- Added the GUI texture
+- Improved the search system it can now find mods and villager professions previously, it only searched for mods
+- Now, when you perform a search, select the result that best matches what you're looking for
+- The GUI now includes localizations for mods' villagers based on the mods' original translations
+
 ## Version 1.3.3
 
 - feat: New `contractCostItem` option you are no longer limited to selecting only emeralds or only experience, you can now enter an item ID. It also works with mods

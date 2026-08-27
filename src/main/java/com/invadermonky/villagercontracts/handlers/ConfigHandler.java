@@ -5,6 +5,7 @@ import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.ReferencesVC;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
@@ -199,7 +200,7 @@ public class ConfigHandler {
 
                 for (VillagerCareer career : careers) {
                     String careerName = VillagerHelper.getCareerName(career);
-                    String prettyName = prettifyName(careerName);
+                    String prettyName = getLocalizedOrPrettyName(career, profession);
                     nameUsageCount.merge(prettyName.toLowerCase(Locale.ROOT), 1, Integer::sum);
                 }
             }
@@ -213,7 +214,7 @@ public class ConfigHandler {
 
                 for (VillagerCareer career : careers) {
                     String careerName = VillagerHelper.getCareerName(career);
-                    String prettyName = prettifyName(careerName);
+                    String prettyName = getLocalizedOrPrettyName(career, profession);
                     String lowerName = prettyName.toLowerCase(Locale.ROOT);
 
                     String contractName;
@@ -233,6 +234,36 @@ public class ConfigHandler {
             }
 
             LogHelper.info("Auto-detected " + EventHandler.contractMap.size() + " villager contracts in total.");
+        }
+
+        private static String getLocalizedOrPrettyName(VillagerCareer career, VillagerProfession profession) {
+            String careerName = VillagerHelper.getCareerName(career);
+
+            String modId = extractModId(profession);
+
+            String[] translationKeys = {
+                    "entity.Villager." + careerName,
+                    "entity.villager." + careerName,
+                    "entity." + modId + "." + careerName,
+                    "entity." + modId + ".villager." + careerName,
+                    "profession." + careerName,
+                    "profession." + modId + "." + careerName,
+                    modId + "." + careerName,
+                    careerName + ".name",
+                    careerName
+            };
+
+            for (String key : translationKeys) {
+                try {
+                    String translated = I18n.format(key);
+                    if (translated != null && !translated.equals(key) && !translated.isEmpty()) {
+                        return translated;
+                    }
+                } catch (Exception e) {
+                }
+            }
+
+            return prettifyName(careerName);
         }
 
         private static String prettifyName(String rawName) {

@@ -1,5 +1,6 @@
 package com.invadermonky.villagercontracts.client.gui;
 
+import com.invadermonky.villagercontracts.VillagerContracts;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
@@ -7,11 +8,13 @@ import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
@@ -29,9 +32,14 @@ import java.util.TreeMap;
  */
 public class GuiVillagerContracts extends GuiScreen {
 
+    private static final ResourceLocation GUI_TEXTURE = new ResourceLocation(
+            VillagerContracts.MOD_ID, "textures/gui/contracts.png");
+    private static final int TEXTURE_WIDTH = 280;
+    private static final int TEXTURE_HEIGHT = 213;
+
     private GuiTextField searchField;
     private final List<ProfessionEntry> professionList = new ArrayList<>();
-    private final List<CareerEntry> careerList = new ArrayList<>();
+    private List<CareerEntry> careerList = new ArrayList<>();
 
     private int selectedProfessionIndex = -1;
     private int selectedCareerIndex = -1;
@@ -97,12 +105,20 @@ public class GuiVillagerContracts extends GuiScreen {
         int xCenter = this.width / 2;
         int yCenter = this.height / 2;
 
-        // Primer rectángulo (borde exterior)
-        drawRect(xCenter - 140, yCenter - 100, xCenter + 140, yCenter + 113, 0xCC000000);
-        // izquierdo superior derecho inferior color
+        int guiLeft = xCenter - TEXTURE_WIDTH / 2;
+        int guiTop = yCenter - 100;
 
-        // Segundo rectángulo (fondo interior)
-        drawRect(xCenter - 138, yCenter - 98, xCenter + 138, yCenter + 111, 0xFF3C3C3C);
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        this.mc.getTextureManager().bindTexture(GUI_TEXTURE);
+        drawModalRectWithCustomSizedTexture(
+                guiLeft,
+                guiTop,
+                0,
+                0,
+                TEXTURE_WIDTH,
+                TEXTURE_HEIGHT,
+                TEXTURE_WIDTH,
+                TEXTURE_HEIGHT);
 
         String title = TextFormatting.GOLD + I18n.format("gui.villagercontracts.title");
         drawCenteredString(this.fontRenderer, title, xCenter, yCenter - 110, 0xFFFFFF);
@@ -222,7 +238,6 @@ public class GuiVillagerContracts extends GuiScreen {
 
         drawCenteredString(this.fontRenderer, costText, xCenter, y, 0xFFFFFF);
 
-        // Show warning if player cannot afford the cost
         if (!canAfford && costType != ContractCostType.NONE) {
             drawCenteredString(this.fontRenderer,
                     TextFormatting.RED + I18n.format("gui.villagercontracts.insufficient_funds"), xCenter, y + 12,
@@ -230,9 +245,6 @@ public class GuiVillagerContracts extends GuiScreen {
         }
     }
 
-    /**
-     * Count the total number of a specific item in the player's inventory.
-     */
     private int countItem(EntityPlayer player, Item item) {
         int count = 0;
         for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
@@ -255,14 +267,56 @@ public class GuiVillagerContracts extends GuiScreen {
                 filtered.add(entry);
                 continue;
             }
+
+            boolean hasMatchingCareer = false;
             for (VillagerInfo info : entry.careers) {
                 if (info.identifier.toLowerCase(Locale.ROOT).contains(filter)) {
-                    filtered.add(entry);
+                    hasMatchingCareer = true;
+                    break;
+                }
+
+                String professionName = VillagerDataHelper.getProfessionName(info.profession);
+                if (professionName.toLowerCase(Locale.ROOT).contains(filter)) {
+                    hasMatchingCareer = true;
+                    break;
+                }
+
+                String careerName = VillagerDataHelper.getCareerName(info.career);
+                if (careerName.toLowerCase(Locale.ROOT).contains(filter)) {
+                    hasMatchingCareer = true;
                     break;
                 }
             }
+
+            if (hasMatchingCareer) {
+                filtered.add(entry);
+            }
         }
+
         return filtered;
+    }
+
+    private void updateCareerList() {
+        careerList.clear();
+        if (selectedProfessionIndex < 0 || selectedProfessionIndex >= professionList.size())
+            return;
+
+        ProfessionEntry prof = professionList.get(selectedProfessionIndex);
+        String filter = searchField.getText().trim().toLowerCase(Locale.ROOT);
+
+        for (VillagerInfo info : prof.careers) {
+            if (!filter.isEmpty()) {
+                boolean matches = info.identifier.toLowerCase(Locale.ROOT).contains(filter)
+                        || VillagerDataHelper.getProfessionName(info.profession).toLowerCase(Locale.ROOT)
+                                .contains(filter)
+                        || VillagerDataHelper.getCareerName(info.career).toLowerCase(Locale.ROOT).contains(filter);
+
+                if (!matches)
+                    continue;
+            }
+
+            careerList.add(new CareerEntry(info.identifier, info.identifier));
+        }
     }
 
     @Override
@@ -274,14 +328,14 @@ public class GuiVillagerContracts extends GuiScreen {
             int xCenter = this.width / 2;
             int yCenter = this.height / 2;
 
+            List<ProfessionEntry> filtered = getFilteredProfessions();
+
             if (mouseX >= xCenter - 135 && mouseX <= xCenter - 5 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
                 int relativeY = mouseY - (yCenter - 60);
                 int clickedIndex = professionScrollOffset + relativeY / 16;
-                List<ProfessionEntry> filtered = getFilteredProfessions();
+
                 if (clickedIndex >= 0 && clickedIndex < filtered.size()) {
-                    selectedProfessionIndex = filtered.indexOf(filtered.get(clickedIndex));
-                    ProfessionEntry selected = filtered.get(clickedIndex);
-                    selectedProfessionIndex = professionList.indexOf(selected);
+                    selectedProfessionIndex = professionList.indexOf(filtered.get(clickedIndex));
                     updateCareerList();
                     selectedCareerIndex = -1;
                     careerScrollOffset = 0;
@@ -318,8 +372,9 @@ public class GuiVillagerContracts extends GuiScreen {
             int mouseX = org.lwjgl.input.Mouse.getEventX() * this.width / this.mc.displayWidth;
             int mouseY = this.height - org.lwjgl.input.Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
+            List<ProfessionEntry> filtered = getFilteredProfessions();
+
             if (mouseX >= xCenter - 135 && mouseX <= xCenter - 5 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
-                List<ProfessionEntry> filtered = getFilteredProfessions();
                 int maxScroll = Math.max(0, filtered.size() - maxVisibleEntries);
                 professionScrollOffset = Math.max(0,
                         Math.min(maxScroll, professionScrollOffset + (scroll > 0 ? -1 : 1)));
@@ -343,6 +398,19 @@ public class GuiVillagerContracts extends GuiScreen {
             selectedProfessionIndex = -1;
             selectedCareerIndex = -1;
             careerList.clear();
+
+            String filter = searchField.getText().trim();
+            if (!filter.isEmpty()) {
+                List<ProfessionEntry> filtered = getFilteredProfessions();
+                if (!filtered.isEmpty()) {
+                    selectedProfessionIndex = professionList.indexOf(filtered.get(0));
+                    updateCareerList();
+
+                    if (!careerList.isEmpty()) {
+                        selectedCareerIndex = 0;
+                    }
+                }
+            }
             return;
         }
 
@@ -367,17 +435,6 @@ public class GuiVillagerContracts extends GuiScreen {
                 new com.invadermonky.villagercontracts.network.PacketApplyContractName(name));
 
         this.mc.player.closeScreen();
-    }
-
-    private void updateCareerList() {
-        careerList.clear();
-        if (selectedProfessionIndex < 0 || selectedProfessionIndex >= professionList.size())
-            return;
-
-        ProfessionEntry prof = professionList.get(selectedProfessionIndex);
-        for (VillagerInfo info : prof.careers) {
-            careerList.add(new CareerEntry(info.identifier, info.identifier));
-        }
     }
 
     @Override
