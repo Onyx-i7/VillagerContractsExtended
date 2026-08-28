@@ -1,4 +1,12 @@
-# Villager Contracts Changelog
+# Villager Contracts Extended Changelog
+
+## Version 1.3.5
+
+- Fixed a bug where translations made by other mods were not updated correctly when changing the game language
+- Improved the English translations
+- Added the `useModTranslations` option to configure whether to use the translations from the mods or their original English names
+
+**This version will serve as the basis for porting this mod to 1.16.5. This means it will no longer receive updates that add new features only compatibility fixes and bug fixes until the 1.16.5 version is complete, which is currently 30% ready**
 
 ## Version 1.3.4
 

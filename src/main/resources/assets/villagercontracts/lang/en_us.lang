@@ -1,9 +1,9 @@
 # Cooldown messages
-message.villagercontracts.cooldown_slavery=The villager refuses to work! You can't have a slave! (Wait: %s)
-message.villagercontracts.cooldown_rest=The villager needs a rest. Come back in %s
-message.villagercontracts.cooldown_tired=The villager looks exhausted. Please wait %s
-message.villagercontracts.cooldown_union=Villager Union says: No more overtime! Wait %s
-message.villagercontracts.cooldown_boss=The villager says: I'm not your employee! Wait %s
+message.villagercontracts.cooldown_slavery=The villager refuses to work! You can't have a slave!
+message.villagercontracts.cooldown_rest=The villager needs a rest.
+message.villagercontracts.cooldown_tired=The villager looks exhausted.
+message.villagercontracts.cooldown_union=Villager Union says: No more overtime!
+message.villagercontracts.cooldown_boss=The villager says: I'm not your employee!
 
 # General messages
 message.villagercontracts.insufficient_funds=You don't have enough resources to apply this contract!
@@ -34,4 +34,4 @@ item.villagercontracts.contract.name=Villager Contract
 itemGroup.villagercontracts=Villager Contracts
 
 # Game Stages messages
-message.villagercontracts.stage_required=You need the Game Stage '%s' to use contracts!
+message.villagercontracts.stage_required=You need the stage %s to use contracts!

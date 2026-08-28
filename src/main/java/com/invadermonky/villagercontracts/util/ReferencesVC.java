@@ -116,4 +116,12 @@ public class ReferencesVC {
                         "Only used when enableGameStages is true and Game Stages mod is installed.\n" +
                         "Example: 'contract_master', 'advanced_trader'\n" +
                         "Default: contract_master";
+
+        public static final String useModTranslationsComment = "When enabled, the mod will try to use translations from other mods for villager names.\n"
+                        +
+                        "For example, if Immersive Engineering has Spanish translations, those will be used.\n" +
+                        "When disabled, names will be auto-generated from the career ID (e.g., 'weapon_smith' -> 'Weapon Smith').\n"
+                        +
+                        "This setting is ignored if autoDetectVillagers is false.\n" +
+                        "Default: true";
 }

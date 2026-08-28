@@ -1,9 +1,9 @@
 # Mensajes de cooldown
-message.villagercontracts.cooldown_slavery=¡El aldeano se niega a trabajar! ¡No puedes tener un esclavo! (Espera: %s)
-message.villagercontracts.cooldown_rest=El aldeano necesita descansar. Vuelve en %s
-message.villagercontracts.cooldown_tired=El aldeano se ve agotado. Por favor espera %s
-message.villagercontracts.cooldown_union=El Sindicato dice: ¡No más horas extra! Espera %s
-message.villagercontracts.cooldown_boss=El aldeano dice: ¡No soy tu empleado! Espera %s
+message.villagercontracts.cooldown_slavery=¡El aldeano se niega a trabajar! ¡No puedes tener un esclavo!
+message.villagercontracts.cooldown_rest=El aldeano necesita descansar.
+message.villagercontracts.cooldown_tired=El aldeano se ve agotado.
+message.villagercontracts.cooldown_union=El Sindicato dice: ¡No más horas extra!
+message.villagercontracts.cooldown_boss=El aldeano dice: ¡No soy tu empleado!
 
 # Mensajes generales
 message.villagercontracts.insufficient_funds=¡No tienes suficientes recursos para aplicar este contrato!
@@ -34,4 +34,4 @@ item.villagercontracts.contract.name=Contrato de Aldeano
 itemGroup.villagercontracts=Villager Contracts
 
 # Mensajes de Game Stages
-message.villagercontracts.stage_required=¡Necesitas la Etapa de Juego '%s' para usar contratos!
+message.villagercontracts.stage_required=¡Necesitas la Etapa de Juego %s para usar contratos

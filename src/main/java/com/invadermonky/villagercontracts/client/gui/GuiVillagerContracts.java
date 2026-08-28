@@ -52,6 +52,7 @@ public class GuiVillagerContracts extends GuiScreen {
     private final int maxVisibleEntries = 8;
 
     public GuiVillagerContracts() {
+		ConfigHandler.ConfigChangeListener.checkLanguageChange();
         rebuildLists();
     }
 

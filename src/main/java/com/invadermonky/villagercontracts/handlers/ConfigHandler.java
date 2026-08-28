@@ -5,6 +5,7 @@ import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.ReferencesVC;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -20,6 +21,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +41,10 @@ public class ConfigHandler {
         ITEM
     }
 
+    // ============================================
+    // BASIC SETTINGS
+    // ============================================
+
     @Comment(ReferencesVC.disableAnvilRenamingComment)
     public static boolean disableAnvilRenaming = false;
 
@@ -54,6 +61,17 @@ public class ConfigHandler {
     @Comment(ReferencesVC.consumeContractOnUseComment)
     public static boolean consumeContractOnUse = true;
 
+    // ============================================
+    // TRANSLATION SYSTEM
+    // ============================================
+
+    @Comment(ReferencesVC.useModTranslationsComment)
+    public static boolean useModTranslations = true;
+
+    // ============================================
+    // COST SETTINGS
+    // ============================================
+
     @Comment(ReferencesVC.contractCostTypeComment)
     public static ContractCostType contractCostType = ContractCostType.NONE;
 
@@ -64,6 +82,10 @@ public class ConfigHandler {
     @Comment(ReferencesVC.contractCostItemComment)
     public static String contractCostItem = "minecraft:emerald";
 
+    // ============================================
+    // COOLDOWN SYSTEM
+    // ============================================
+
     @Comment(ReferencesVC.enableCooldownComment)
     public static boolean enableCooldown = false;
 
@@ -71,17 +93,29 @@ public class ConfigHandler {
     @RangeInt(min = 100, max = 1728000)
     public static int cooldownTicks = 24000;
 
+    // ============================================
+    // VILLAGER NAMING SYSTEM
+    // ============================================
+
     @Comment(ReferencesVC.autoNameVillagersComment)
-    public static boolean autoNameVillagers = false;
+    public static boolean autoNameVillagers = true;
 
     @Comment(ReferencesVC.overrideCustomNamesComment)
     public static boolean overrideCustomNames = false;
+
+    // ============================================
+    // GAME STAGES INTEGRATION
+    // ============================================
 
     @Comment(ReferencesVC.enableGameStagesComment)
     public static boolean enableGameStages = false;
 
     @Comment(ReferencesVC.requiredGameStageComment)
     public static String requiredGameStage = "contract_master";
+
+    // ============================================
+    // CONTRACTS AND BLACKLIST
+    // ============================================
 
     @LangKey("config." + VillagerContracts.MOD_ID + ":validcontracts")
     @Comment(ReferencesVC.validContractsComment)
@@ -94,6 +128,9 @@ public class ConfigHandler {
 
     private static Item cachedCostItem = null;
     private static String cachedCostItemId = null;
+
+    // Track the last language used to detect language changes
+    private static String lastLanguage = "";
 
     public static Item getCostItem() {
         if (contractCostType != ContractCostType.ITEM) {
@@ -144,6 +181,57 @@ public class ConfigHandler {
             if (autoDetectVillagers) {
                 autoDetectAllVillagers();
             }
+
+            // Update the last language tracker
+            lastLanguage = getCurrentLanguage();
+        }
+
+        /**
+         * Gets the current game language code.
+         * Returns empty string if called from server side.
+         */
+        @SideOnly(Side.CLIENT)
+        private static String getCurrentLanguage() {
+            try {
+                return Minecraft.getMinecraft().gameSettings.language;
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        /**
+         * Checks if the game language has changed and re-detects villagers if needed.
+         * Called from the GUI when it opens to ensure names are up-to-date.
+         */
+        @SideOnly(Side.CLIENT)
+        public static void checkLanguageChange() {
+            String currentLanguage = getCurrentLanguage();
+
+            // Skip if language tracking is not initialized yet
+            if (lastLanguage.isEmpty()) {
+                lastLanguage = currentLanguage;
+                return;
+            }
+
+            // If language changed, re-sync all contracts with the new language
+            if (!currentLanguage.equals(lastLanguage)) {
+                LogHelper.info("Language changed from " + lastLanguage + " to " + currentLanguage
+                        + ", re-detecting villagers...");
+                lastLanguage = currentLanguage;
+
+                // Clear and rebuild the contract map with new translations
+                EventHandler.contractMap.clear();
+
+                for (String configStr : validContracts) {
+                    if (configStr != null && !configStr.trim().isEmpty()) {
+                        parseConfiguredVillager(configStr.trim());
+                    }
+                }
+
+                if (autoDetectVillagers) {
+                    autoDetectAllVillagers();
+                }
+            }
         }
 
         public static void dumpVillagerInfo() {
@@ -190,6 +278,11 @@ public class ConfigHandler {
             }
         }
 
+        /**
+         * Detects all professions and careers registered by other mods
+         * Uses mod translations when available and enabled, falls back to prettifyName
+         * otherwise
+         */
         public static void autoDetectAllVillagers() {
             Map<String, Integer> nameUsageCount = new HashMap<>();
 
@@ -199,7 +292,6 @@ public class ConfigHandler {
                     continue;
 
                 for (VillagerCareer career : careers) {
-                    String careerName = VillagerHelper.getCareerName(career);
                     String prettyName = getLocalizedOrPrettyName(career, profession);
                     nameUsageCount.merge(prettyName.toLowerCase(Locale.ROOT), 1, Integer::sum);
                 }
@@ -213,7 +305,6 @@ public class ConfigHandler {
                 String modId = extractModId(profession);
 
                 for (VillagerCareer career : careers) {
-                    String careerName = VillagerHelper.getCareerName(career);
                     String prettyName = getLocalizedOrPrettyName(career, profession);
                     String lowerName = prettyName.toLowerCase(Locale.ROOT);
 
@@ -236,11 +327,23 @@ public class ConfigHandler {
             LogHelper.info("Auto-detected " + EventHandler.contractMap.size() + " villager contracts in total.");
         }
 
+        /**
+         * Attempts to get the localized name of a career/profession
+         * Rs espects the useModTranslations config option
+         * Fallback to prettifyName if no translation exists or translations are
+         * disabled.
+         */
         private static String getLocalizedOrPrettyName(VillagerCareer career, VillagerProfession profession) {
             String careerName = VillagerHelper.getCareerName(career);
 
+            // If translations are disabled, use prettifyName directly
+            if (!useModTranslations) {
+                return prettifyName(careerName);
+            }
+
             String modId = extractModId(profession);
 
+            // Translation key patterns used by various mods
             String[] translationKeys = {
                     "entity.Villager." + careerName,
                     "entity.villager." + careerName,
@@ -260,12 +363,17 @@ public class ConfigHandler {
                         return translated;
                     }
                 } catch (Exception e) {
+                    // Ignore and try next key
                 }
             }
 
+            // No translation found, use prettifyName
             return prettifyName(careerName);
         }
 
+        /**
+         * Converts a name like "weapon_smith" to "Weapon Smith"
+         */
         private static String prettifyName(String rawName) {
             if (rawName == null || rawName.isEmpty())
                 return rawName;
