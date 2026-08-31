@@ -11,7 +11,6 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -19,12 +18,7 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Main GUI to navigate through all available professions and careers
@@ -36,23 +30,19 @@ public class GuiVillagerContracts extends GuiScreen {
             VillagerContracts.MOD_ID, "textures/gui/contracts.png");
     private static final int TEXTURE_WIDTH = 280;
     private static final int TEXTURE_HEIGHT = 213;
-
-    private GuiTextField searchField;
     private final List<ProfessionEntry> professionList = new ArrayList<>();
-    private List<CareerEntry> careerList = new ArrayList<>();
-
+    private final int maxVisibleEntries = 8;
+    private GuiTextField searchField;
+    private final List<CareerEntry> careerList = new ArrayList<>();
     private int selectedProfessionIndex = -1;
     private int selectedCareerIndex = -1;
     private int professionScrollOffset = 0;
     private int careerScrollOffset = 0;
-
     private long lastCareerClickTime = 0;
     private int lastCareerClickIndex = -1;
 
-    private final int maxVisibleEntries = 8;
-
     public GuiVillagerContracts() {
-		ConfigHandler.ConfigChangeListener.checkLanguageChange();
+        ConfigHandler.ConfigChangeListener.checkLanguageChange();
         rebuildLists();
     }
 
@@ -309,7 +299,7 @@ public class GuiVillagerContracts extends GuiScreen {
             if (!filter.isEmpty()) {
                 boolean matches = info.identifier.toLowerCase(Locale.ROOT).contains(filter)
                         || VillagerDataHelper.getProfessionName(info.profession).toLowerCase(Locale.ROOT)
-                                .contains(filter)
+                        .contains(filter)
                         || VillagerDataHelper.getCareerName(info.career).toLowerCase(Locale.ROOT).contains(filter);
 
                 if (!matches)
@@ -347,6 +337,7 @@ public class GuiVillagerContracts extends GuiScreen {
 
             if (mouseX >= xCenter + 5 && mouseX <= xCenter + 135 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
                 int relativeY = mouseY - (yCenter - 60);
+
                 int clickedIndex = careerScrollOffset + relativeY / 16;
                 if (clickedIndex >= 0 && clickedIndex < careerList.size()) {
                     long currentTime = System.currentTimeMillis();

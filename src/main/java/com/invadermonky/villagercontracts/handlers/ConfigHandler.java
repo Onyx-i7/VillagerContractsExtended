@@ -113,6 +113,9 @@ public class ConfigHandler {
     @Comment(ReferencesVC.requiredGameStageComment)
     public static String requiredGameStage = "contract_master";
 
+    @Comment(ReferencesVC.professionGameStagesComment)
+    public static String[] professionGameStages = new String[0];
+
     // ============================================
     // CONTRACTS AND BLACKLIST
     // ============================================
@@ -125,12 +128,15 @@ public class ConfigHandler {
     public static String[] entityBlacklist = ReferencesVC.defaultBlacklist;
 
     private static final Pattern CONTRACT_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+?)\\s*;\\s*(.+)$");
+    private static final Pattern STAGE_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+)$");
 
     private static Item cachedCostItem = null;
     private static String cachedCostItemId = null;
 
     // Track the last language used to detect language changes
     private static String lastLanguage = "";
+
+    private static final Map<String, String> PROFESSION_STAGE_CACHE = new HashMap<>();
 
     public static Item getCostItem() {
         if (contractCostType != ContractCostType.ITEM) {
@@ -150,6 +156,36 @@ public class ConfigHandler {
         }
 
         return cachedCostItem;
+    }
+
+    private static void parseProfessionGameStages() {
+        PROFESSION_STAGE_CACHE.clear();
+            
+        for (String entry : professionGameStages) {
+            if (entry == null || entry.trim().isEmpty())
+                continue;
+                
+            Matcher matcher = STAGE_PATTERN.matcher(entry.trim());
+            if (matcher.matches()) {
+                String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                String stageName = matcher.group(2).trim();
+                PROFESSION_STAGE_CACHE.put(professionId, stageName);
+            } else {
+                LogHelper.error("Invalid profession game stage entry. Expected 'profession_id=stage_name'. Got: " + entry);
+            }
+        }
+        LogHelper.info("Loaded " + PROFESSION_STAGE_CACHE.size() + " profession-specific game stages.");
+    }
+
+    public static String getRequiredStageForProfession(VillagerProfession profession) {
+            if (profession == null || profession.getRegistryName() == null) {
+                return requiredGameStage;
+            }
+            
+            String professionId = profession.getRegistryName().toString().toLowerCase(Locale.ROOT);
+            String specificStage = PROFESSION_STAGE_CACHE.get(professionId);
+            
+            return specificStage != null ? specificStage : requiredGameStage;
     }
 
     @Mod.EventBusSubscriber(modid = VillagerContracts.MOD_ID)
@@ -181,6 +217,8 @@ public class ConfigHandler {
             if (autoDetectVillagers) {
                 autoDetectAllVillagers();
             }
+
+            parseProfessionGameStages();
 
             // Update the last language tracker
             lastLanguage = getCurrentLanguage();

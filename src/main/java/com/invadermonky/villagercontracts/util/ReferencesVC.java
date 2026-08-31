@@ -124,4 +124,14 @@ public class ReferencesVC {
                         +
                         "This setting is ignored if autoDetectVillagers is false.\n" +
                         "Default: true";
+
+        public static final String professionGameStagesComment =
+            "Specific Game Stages required for individual professions\n" +
+            "Format: 'profession_id=stage_name'\n" +
+            "Example:\n" +
+            "  minecraft:farmer=basic_trader\n" +
+            "  minecraft:librarian=advanced_trader\n" +
+            "  thaumcraft:alchemist=magic_unlocked\n" +
+            "Professions not listed here will use the global 'requiredGameStage'\n" +
+            "This setting is ignored if enableGameStages is false";
 }

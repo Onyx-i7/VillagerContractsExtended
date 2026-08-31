@@ -34,4 +34,5 @@ item.villagercontracts.contract.name=Villager Contract
 itemGroup.villagercontracts=Villager Contracts
 
 # Game Stages messages
-message.villagercontracts.stage_required=You need the stage %s to use contracts!
+message.villagercontracts.stage_required=You need the stage %s to use contracts
+message.villagercontracts.stage_required_specific=You need the stage %s to apply the %s contract

@@ -1,7 +1,7 @@
 package com.invadermonky.villagercontracts.handlers;
 
 import com.invadermonky.villagercontracts.compat.GameStageIntegration;
-import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
+import com.invadermonky.villagercontracts.handlers.ConfigHandler.*;
 import com.invadermonky.villagercontracts.init.RegistryVC;
 import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.VillagerDataHelper;
@@ -155,10 +155,15 @@ public class EventHandler {
                 EntityVillager villager = (EntityVillager) target;
                 long currentTime = world.getTotalWorldTime();
 
+                // Check Game Stages requirement (profession-specific or global)
                 if (ConfigHandler.enableGameStages && GameStageIntegration.isAvailable()) {
-                    if (!GameStageIntegration.hasRequiredStage(player, ConfigHandler.requiredGameStage)) {
+                    String requiredStage = ConfigHandler.getRequiredStageForProfession(villagerInfo.profession);
+                    
+                    if (!GameStageIntegration.hasRequiredStage(player, requiredStage)) {
                         TextComponentTranslation msg = new TextComponentTranslation(
-                                "message.villagercontracts.stage_required", ConfigHandler.requiredGameStage);
+                                "message.villagercontracts.stage_required_specific", 
+                                villagerInfo.identifier, 
+                                requiredStage);
                         msg.getStyle().setColor(TextFormatting.RED);
                         player.sendMessage(msg);
                         villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);

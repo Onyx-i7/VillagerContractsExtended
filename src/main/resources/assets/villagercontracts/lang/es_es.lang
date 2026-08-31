@@ -34,4 +34,5 @@ item.villagercontracts.contract.name=Contrato de Aldeano
 itemGroup.villagercontracts=Villager Contracts
 
 # Mensajes de Game Stages
-message.villagercontracts.stage_required=¡Necesitas la Etapa de Juego %s para usar contratos
+message.villagercontracts.stage_required=Necesitas la Etapa de Juego %s para usar contratos
+message.villagercontracts.stage_required_specific=Necesitas la Etapa de Juego %s para aplicar el contrato %s
