@@ -35,3 +35,4 @@ itemGroup.villagercontracts=Контракты жителей
 
 # Game Stages messages
 message.villagercontracts.stage_required=Вам нужен этап %s, чтобы использовать контракты!
+message.villagercontracts.stage_required_specific=Для заключения контракта %s вам потребуется платформа %s
