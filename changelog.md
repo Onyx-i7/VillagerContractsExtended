@@ -1,12 +1,20 @@
 # Villager Contracts Extended Changelog
 
-## Version 1.3.5 (Currently in development)
+## Version 1.3.5
 
-- Fixed a bug where translations made by other mods were not updated correctly when changing the game language
-- Improved the English translations
-- Added the `useModTranslations` option to configure whether to use the translations from the mods or their original English names
+### Bug Fixes
+
+- Fixed a bug where translations provided by other mods were not updated correctly when changing the game's language
+
+### Added
+
+- Added the `useModTranslations` option to configure whether to use mod translations or the original English names
 - Added the `professionGameStages` option, which specifies the specific GameStages levels required for each profession
-- Added translations from Russian, thanks to @MrKoteo
+- Added Russian translations, thanks to @MrKoteo
+
+### Improvements
+
+- Improved the English translations
 
 ## Version 1.3.4
 

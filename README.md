@@ -5,7 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.12.2-green.svg?style=flat-square)](https://minecraft.net)
 [![Forge](https://img.shields.io/badge/Forge-14.23.5.2847+-red.svg?style=flat-square)](https://files.minecraftforge.net/)
-[![Version](https://img.shields.io/badge/Version-1.3.3-orange.svg?style=flat-square)](https://www.curseforge.com/minecraft/mc-mods/villager-contracts-extended/files)
 
 **A fork of [VillagerContract](https://www.curseforge.com/minecraft/mc-mods/villager-contracts) with some improvements**
 
@@ -24,8 +23,6 @@
 ## Features
 
 ### GUI
-
-***Texture currently under development***
 
 * **No More Anvil**: The tooltip and anvil system was a bit tedious when there were a lot of mods, causing it to sometimes disappear off the screen
 * **Menu**: Right-clicking while holding a contract opens a simple interface where you can easily select any profession or career available in the game
@@ -113,3 +110,4 @@ Since the original project was legitimately published under the MIT License, thi
 
 * **Invadermonky**: Creator of the original *Villager Contracts* mod
 * **Onyx_i7**: Developer of this fork, responsible for performance optimizations, the GUI, and maintenance
+* **MrKoteo**: Russian (ru_ru) translation
