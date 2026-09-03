@@ -3,7 +3,6 @@ package com.invadermonky.villagercontracts.handlers;
 import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.*;
 import com.invadermonky.villagercontracts.init.RegistryVC;
-import com.invadermonky.villagercontracts.util.LogHelper;
 import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
@@ -77,33 +76,31 @@ public class EventHandler {
         }
     }
 
-    private static boolean canPayCost(EntityPlayer player) {
-        ContractCostType costType = ConfigHandler.contractCostType;
-        int costAmount = ConfigHandler.contractCostAmount;
+    private static boolean canPayCost(EntityPlayer player, VillagerProfession profession) {
+        ConfigHandler.ProfessionCost cost = ConfigHandler.getCostForProfession(profession);
 
-        if (costType == ContractCostType.EXPERIENCE) {
-            return player.experienceLevel >= costAmount;
-        } else if (costType == ContractCostType.ITEM) {
-            Item costItem = ConfigHandler.getCostItem();
+        if (cost.type == ContractCostType.EXPERIENCE) {
+            return player.experienceLevel >= cost.amount;
+        } else if (cost.type == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getItemFromId(cost.itemId);
             if (costItem == null) {
                 return false;
             }
             int itemCount = countItem(player, costItem);
-            return itemCount >= costAmount;
+            return itemCount >= cost.amount;
         }
         return true;
     }
 
-    private static void payCost(EntityPlayer player) {
-        ContractCostType costType = ConfigHandler.contractCostType;
-        int costAmount = ConfigHandler.contractCostAmount;
+    private static void payCost(EntityPlayer player, VillagerProfession profession) {
+        ConfigHandler.ProfessionCost cost = ConfigHandler.getCostForProfession(profession);
 
-        if (costType == ContractCostType.EXPERIENCE) {
-            player.addExperienceLevel(-costAmount);
-        } else if (costType == ContractCostType.ITEM) {
-            Item costItem = ConfigHandler.getCostItem();
+        if (cost.type == ContractCostType.EXPERIENCE) {
+            player.addExperienceLevel(-cost.amount);
+        } else if (cost.type == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getItemFromId(cost.itemId);
             if (costItem != null) {
-                consumeItem(player, costItem, costAmount);
+                consumeItem(player, costItem, cost.amount);
             }
         }
     }
@@ -188,7 +185,7 @@ public class EventHandler {
                     return;
                 }
 
-                if (!canPayCost(player)) {
+                if (!canPayCost(player, villagerInfo.profession)) {
                     TextComponentTranslation msg = new TextComponentTranslation(
                             "message.villagercontracts.insufficient_funds");
                     msg.getStyle().setColor(TextFormatting.RED);
@@ -218,7 +215,7 @@ public class EventHandler {
 
                 villager.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
 
-                payCost(player);
+                payCost(player, villagerInfo.profession);
 
                 String villagerDisplayName = villager.hasCustomName() ? villager.getCustomNameTag() : villagerInfo.identifier;
                 TextComponentTranslation successMsg = new TextComponentTranslation(

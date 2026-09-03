@@ -54,10 +54,6 @@ public class ConfigHandler {
     @Comment(ReferencesVC.autoDetectVillagersComment)
     public static boolean autoDetectVillagers = true;
 
-    @Comment(ReferencesVC.generateVillagerAttemptsComment)
-    @RangeInt(min = 1, max = 100)
-    public static int generateVillagerAttempts = 20;
-
     @Comment(ReferencesVC.consumeContractOnUseComment)
     public static boolean consumeContractOnUse = true;
 
@@ -81,6 +77,9 @@ public class ConfigHandler {
 
     @Comment(ReferencesVC.contractCostItemComment)
     public static String contractCostItem = "minecraft:emerald";
+
+    @Comment(ReferencesVC.professionCostsComment)
+    public static String[] professionCosts = new String[0];
 
     // ============================================
     // COOLDOWN SYSTEM
@@ -127,8 +126,17 @@ public class ConfigHandler {
     @Comment(ReferencesVC.entityBlacklistComment)
     public static String[] entityBlacklist = ReferencesVC.defaultBlacklist;
 
+    // ============================================
+    // PRIVATE FIELDS AND PATTERNS
+    // ============================================
+
     private static final Pattern CONTRACT_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+?)\\s*;\\s*(.+)$");
     private static final Pattern STAGE_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+)$");
+
+    // Format: profession_id=COST_TYPE:cost_value;amount
+    private static final Pattern PROFESSION_COST_PATTERN = Pattern.compile(
+            "^(.+?)\\s*=\\s*(ITEM|EXPERIENCE|XP)\\s*:\\s*(.+?)\\s*;\\s*(\\d+)$",
+            Pattern.CASE_INSENSITIVE);
 
     private static Item cachedCostItem = null;
     private static String cachedCostItemId = null;
@@ -136,7 +144,32 @@ public class ConfigHandler {
     // Track the last language used to detect language changes
     private static String lastLanguage = "";
 
+    // Cache for profession-specific game stages (profession_id -> stage_name)
     private static final Map<String, String> PROFESSION_STAGE_CACHE = new HashMap<>();
+
+    // Cache for profession-specific costs (profession_id -> ProfessionCost)
+    private static final Map<String, ProfessionCost> PROFESSION_COST_CACHE = new HashMap<>();
+
+    // ============================================
+    // PROFESSION COST CLASS
+    // ============================================
+
+    /** Represents a cost configuration for a specific professio **/
+    public static class ProfessionCost {
+        public final ContractCostType type;
+        public final String itemId;
+        public final int amount;
+
+        public ProfessionCost(ContractCostType type, String itemId, int amount) {
+            this.type = type;
+            this.itemId = itemId;
+            this.amount = amount;
+        }
+    }
+
+    // ============================================
+    // PUBLIC STATIC METHODS
+    // ============================================
 
     public static Item getCostItem() {
         if (contractCostType != ContractCostType.ITEM) {
@@ -158,35 +191,61 @@ public class ConfigHandler {
         return cachedCostItem;
     }
 
-    private static void parseProfessionGameStages() {
-        PROFESSION_STAGE_CACHE.clear();
-            
-        for (String entry : professionGameStages) {
-            if (entry == null || entry.trim().isEmpty())
-                continue;
-                
-            Matcher matcher = STAGE_PATTERN.matcher(entry.trim());
-            if (matcher.matches()) {
-                String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
-                String stageName = matcher.group(2).trim();
-                PROFESSION_STAGE_CACHE.put(professionId, stageName);
-            } else {
-                LogHelper.error("Invalid profession game stage entry. Expected 'profession_id=stage_name'. Got: " + entry);
-            }
+    /**
+     * Gets an Item from its registry ID string
+     * Returns null if the item doesn't exist
+     */
+    public static Item getItemFromId(String itemId) {
+        if (itemId == null || itemId.isEmpty()) {
+            return null;
         }
-        LogHelper.info("Loaded " + PROFESSION_STAGE_CACHE.size() + " profession-specific game stages.");
+
+        try {
+            ResourceLocation location = new ResourceLocation(itemId);
+            return ForgeRegistries.ITEMS.getValue(location);
+        } catch (Exception e) {
+            LogHelper.error("Invalid item ID: " + itemId);
+            return null;
+        }
     }
 
+    /**
+     * Gets the required Game Stage for a specific profession
+     * Returns the profession-specific stage if configured
+     */
     public static String getRequiredStageForProfession(VillagerProfession profession) {
-            if (profession == null || profession.getRegistryName() == null) {
-                return requiredGameStage;
-            }
-            
-            String professionId = profession.getRegistryName().toString().toLowerCase(Locale.ROOT);
-            String specificStage = PROFESSION_STAGE_CACHE.get(professionId);
-            
-            return specificStage != null ? specificStage : requiredGameStage;
+        if (profession == null || profession.getRegistryName() == null) {
+            return requiredGameStage;
+        }
+
+        String professionId = profession.getRegistryName().toString().toLowerCase(Locale.ROOT);
+        String specificStage = PROFESSION_STAGE_CACHE.get(professionId);
+
+        return specificStage != null ? specificStage : requiredGameStage;
     }
+
+    /**
+     * Gets the cost configuration for a specific profession.
+     * Returns the profession-specific cost if configured, otherwise the global cost.
+     */
+    public static ProfessionCost getCostForProfession(VillagerProfession profession) {
+        if (profession == null || profession.getRegistryName() == null) {
+            return new ProfessionCost(contractCostType, contractCostItem, contractCostAmount);
+        }
+
+        String professionId = profession.getRegistryName().toString().toLowerCase(Locale.ROOT);
+        ProfessionCost specificCost = PROFESSION_COST_CACHE.get(professionId);
+
+        if (specificCost != null) {
+            return specificCost;
+        }
+
+        return new ProfessionCost(contractCostType, contractCostItem, contractCostAmount);
+    }
+
+    // ============================================
+    // CONFIG CHANGE LISTENER
+    // ============================================
 
     @Mod.EventBusSubscriber(modid = VillagerContracts.MOD_ID)
     public static class ConfigChangeListener {
@@ -218,7 +277,11 @@ public class ConfigHandler {
                 autoDetectAllVillagers();
             }
 
+            // Parse profession-specific game stages
             parseProfessionGameStages();
+
+            // Parse profession-specific costs
+            parseProfessionCosts();
 
             // Update the last language tracker
             lastLanguage = getCurrentLanguage();
@@ -245,19 +308,15 @@ public class ConfigHandler {
         public static void checkLanguageChange() {
             String currentLanguage = getCurrentLanguage();
 
-            // Skip if language tracking is not initialized yet
             if (lastLanguage.isEmpty()) {
                 lastLanguage = currentLanguage;
                 return;
             }
 
-            // If language changed, re-sync all contracts with the new language
             if (!currentLanguage.equals(lastLanguage)) {
-                LogHelper.info("Language changed from " + lastLanguage + " to " + currentLanguage
-                        + ", re-detecting villagers...");
+                LogHelper.info("Language changed from " + lastLanguage + " to " + currentLanguage + ", re-detecting villagers...");
                 lastLanguage = currentLanguage;
 
-                // Clear and rebuild the contract map with new translations
                 EventHandler.contractMap.clear();
 
                 for (String configStr : validContracts) {
@@ -269,7 +328,77 @@ public class ConfigHandler {
                 if (autoDetectVillagers) {
                     autoDetectAllVillagers();
                 }
+
+                // Re-parse profession-specific game stages and costs
+                parseProfessionGameStages();
+                parseProfessionCosts();
             }
+        }
+
+        /**
+         * Parses the profession-specific game stages from config
+         */
+        private static void parseProfessionGameStages() {
+            PROFESSION_STAGE_CACHE.clear();
+
+            for (String entry : professionGameStages) {
+                if (entry == null || entry.trim().isEmpty())
+                    continue;
+
+                Matcher matcher = STAGE_PATTERN.matcher(entry.trim());
+                if (matcher.matches()) {
+                    String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                    String stageName = matcher.group(2).trim();
+                    PROFESSION_STAGE_CACHE.put(professionId, stageName);
+                } else {
+                    LogHelper.error("Invalid profession game stage entry. Expected 'profession_id=stage_name'. Got: " + entry);
+                }
+            }
+
+            LogHelper.info("Loaded " + PROFESSION_STAGE_CACHE.size() + " profession-specific game stages.");
+        }
+
+        /**
+         * Parses the profession-specific costs from config
+         */
+        private static void parseProfessionCosts() {
+            PROFESSION_COST_CACHE.clear();
+
+            for (String entry : professionCosts) {
+                if (entry == null || entry.trim().isEmpty())
+                    continue;
+
+                Matcher matcher = PROFESSION_COST_PATTERN.matcher(entry.trim());
+                if (matcher.matches()) {
+                    String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                    String costTypeStr = matcher.group(2).trim().toUpperCase(Locale.ROOT);
+                    String costValue = matcher.group(3).trim();
+                    int amount;
+
+                    try {
+                        amount = Integer.parseInt(matcher.group(4));
+                    } catch (NumberFormatException e) {
+                        LogHelper.error("Invalid amount in profession cost entry: " + entry);
+                        continue;
+                    }
+
+                    ContractCostType costType;
+                    if ("ITEM".equals(costTypeStr)) {
+                        costType = ContractCostType.ITEM;
+                    } else if ("EXPERIENCE".equals(costTypeStr) || "XP".equals(costTypeStr)) {
+                        costType = ContractCostType.EXPERIENCE;
+                    } else {
+                        LogHelper.error("Invalid cost type in profession cost entry: " + costTypeStr);
+                        continue;
+                    }
+
+                    PROFESSION_COST_CACHE.put(professionId, new ProfessionCost(costType, costValue, amount));
+                } else {
+                    LogHelper.error("Invalid profession cost entry. Expected 'profession_id=TYPE:value;amount'. Got: " + entry);
+                }
+            }
+
+            LogHelper.info("Loaded " + PROFESSION_COST_CACHE.size() + " profession-specific costs.");
         }
 
         public static void dumpVillagerInfo() {
@@ -317,9 +446,7 @@ public class ConfigHandler {
         }
 
         /**
-         * Detects all professions and careers registered by other mods
-         * Uses mod translations when available and enabled, falls back to prettifyName
-         * otherwise
+         * Automatically detects all professions and careers registered by other mods
          */
         public static void autoDetectAllVillagers() {
             Map<String, Integer> nameUsageCount = new HashMap<>();
@@ -367,21 +494,16 @@ public class ConfigHandler {
 
         /**
          * Attempts to get the localized name of a career/profession
-         * Rs espects the useModTranslations config option
-         * Fallback to prettifyName if no translation exists or translations are
-         * disabled.
          */
         private static String getLocalizedOrPrettyName(VillagerCareer career, VillagerProfession profession) {
             String careerName = VillagerHelper.getCareerName(career);
 
-            // If translations are disabled, use prettifyName directly
             if (!useModTranslations) {
                 return prettifyName(careerName);
             }
 
             String modId = extractModId(profession);
 
-            // Translation key patterns used by various mods
             String[] translationKeys = {
                     "entity.Villager." + careerName,
                     "entity.villager." + careerName,
@@ -397,7 +519,7 @@ public class ConfigHandler {
             for (String key : translationKeys) {
                 try {
                     String translated = I18n.format(key);
-                    if (translated != null && !translated.equals(key) && !translated.isEmpty()) {
+                    if (!translated.equals(key) && !translated.isEmpty()) {
                         return translated;
                     }
                 } catch (Exception e) {
@@ -405,7 +527,6 @@ public class ConfigHandler {
                 }
             }
 
-            // No translation found, use prettifyName
             return prettifyName(careerName);
         }
 
@@ -420,7 +541,8 @@ public class ConfigHandler {
 
             if (name.contains(":")) {
                 name = name.split(":")[1];
-            } else if (name.contains(".")) {
+            }
+            else if (name.contains(".")) {
                 String[] parts = name.split("\\.");
                 if (parts.length > 1) {
                     name = parts[parts.length - 1];

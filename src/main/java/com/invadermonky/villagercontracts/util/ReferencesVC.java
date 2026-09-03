@@ -39,8 +39,6 @@ public class ReferencesVC {
                         +
                         "to configure them manually. Contracts defined in 'validContracts' take priority.";
 
-        public static final String generateVillagerAttemptsComment = "This value is no longer used due to recent code optimizations, but is kept for compatibility with old configurations.";
-
         public static final String consumeContractOnUseComment = "Determines whether the Villager Contract is consumed when applied to a villager.\n"
                         +
                         "If enabled (true), the contract disappears after changing the villager's profession.\n" +
@@ -134,4 +132,18 @@ public class ReferencesVC {
             "  thaumcraft:alchemist=magic_unlocked\n" +
             "Professions not listed here will use the global 'requiredGameStage'\n" +
             "This setting is ignored if enableGameStages is false";
+
+        // Possibly buggy
+        public static final String professionCostsComment =
+                "Specific costs for individual professions\n" +
+                        "Format: 'profession_id=COST_TYPE:cost_value;amount'\n" +
+                        "COST_TYPE can be ITEM or EXPERIENCE\n" +
+                        "Examples:\n" +
+                        "  minecraft:librarian=ITEM:minecraft:book;5\n" +
+                        "  minecraft:farmer=ITEM:minecraft:wheat_seeds;3\n" +
+                        "  minecraft:priest=EXPERIENCE:0;5\n" +
+                        "  thaumcraft:alchemist=ITEM:thaumcraft:phial;2\n" +
+                        "For EXPERIENCE type, the cost_value is ignored (use 0)\n" +
+                        "Professions not listed here will use the global cost settings\n" +
+                        "This setting is ignored if contractCostType is NONE and no specific costs are defined";
 }

@@ -15,6 +15,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -197,31 +198,31 @@ public class GuiVillagerContracts extends GuiScreen {
     }
 
     private void drawCostInfo(int xCenter, int y) {
-        ContractCostType costType = ConfigHandler.contractCostType;
-        int costAmount = ConfigHandler.contractCostAmount;
+        VillagerRegistry.VillagerProfession selectedProfession = getSelectedProfession();
+        ConfigHandler.ProfessionCost cost = ConfigHandler.getCostForProfession(selectedProfession);
 
-        if (costType == ContractCostType.NONE || costAmount <= 0) {
+        if (cost.type == ContractCostType.NONE || cost.amount <= 0) {
             return;
         }
 
         boolean canAfford = false;
         String costText = "";
 
-        if (costType == ContractCostType.EXPERIENCE) {
+        if (cost.type == ContractCostType.EXPERIENCE) {
             int playerXP = this.mc.player.experienceLevel;
-            canAfford = playerXP >= costAmount;
+            canAfford = playerXP >= cost.amount;
             String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
-            costText = colorCode + I18n.format("gui.villagercontracts.cost_experience", costAmount, playerXP);
-        } else if (costType == ContractCostType.ITEM) {
-            Item costItem = ConfigHandler.getCostItem();
+            costText = colorCode + I18n.format("gui.villagercontracts.cost_experience", cost.amount, playerXP);
+        } else if (cost.type == ContractCostType.ITEM) {
+            Item costItem = ConfigHandler.getItemFromId(cost.itemId);
             if (costItem != null) {
                 int playerItemCount = countItem(this.mc.player, costItem);
-                canAfford = playerItemCount >= costAmount;
+                canAfford = playerItemCount >= cost.amount;
                 String colorCode = canAfford ? TextFormatting.GREEN.toString() : TextFormatting.RED.toString();
 
                 String itemName = new ItemStack(costItem).getDisplayName();
                 costText = colorCode
-                        + I18n.format("gui.villagercontracts.cost_item", costAmount, itemName, playerItemCount);
+                        + I18n.format("gui.villagercontracts.cost_item", cost.amount, itemName, playerItemCount);
             } else {
                 costText = TextFormatting.RED + I18n.format("gui.villagercontracts.cost_item_not_found");
             }
@@ -229,7 +230,7 @@ public class GuiVillagerContracts extends GuiScreen {
 
         drawCenteredString(this.fontRenderer, costText, xCenter, y, 0xFFFFFF);
 
-        if (!canAfford && costType != ContractCostType.NONE) {
+        if (!canAfford) {
             drawCenteredString(this.fontRenderer,
                     TextFormatting.RED + I18n.format("gui.villagercontracts.insufficient_funds"), xCenter, y + 12,
                     0xFFFFFF);
@@ -452,5 +453,27 @@ public class GuiVillagerContracts extends GuiScreen {
             this.displayName = displayName;
             this.contractName = contractName;
         }
+    }
+
+    private VillagerRegistry.VillagerProfession getSelectedProfession() {
+        if (selectedProfessionIndex < 0 || selectedProfessionIndex >= professionList.size()) {
+            return null;
+        }
+
+        ProfessionEntry entry = professionList.get(selectedProfessionIndex);
+        if (entry.careers.isEmpty()) {
+            return null;
+        }
+
+        if (selectedCareerIndex >= 0 && selectedCareerIndex < careerList.size()) {
+            String selectedCareerName = careerList.get(selectedCareerIndex).contractName;
+            for (VillagerInfo info : entry.careers) {
+                if (info.identifier.equals(selectedCareerName)) {
+                    return info.profession;
+                }
+            }
+        }
+
+        return entry.careers.get(0).profession;
     }
 }
