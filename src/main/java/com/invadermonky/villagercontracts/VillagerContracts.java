@@ -2,7 +2,7 @@ package com.invadermonky.villagercontracts;
 
 import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
-import com.invadermonky.villagercontracts.network.PacketHandler;
+import com.invadermonky.villagercontracts.network.Packet;
 import com.invadermonky.villagercontracts.proxy.CommonProxy;
 import com.invadermonky.villagercontracts.util.LogHelper;
 import net.minecraftforge.common.config.ConfigManager;
@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class VillagerContracts {
     public static final String MOD_ID = "villagercontracts";
     public static final String MOD_NAME = "Villager Contracts";
-    public static final String MOD_VERSION = "1.3.6";
+    public static final String MOD_VERSION = "1.3.7";
     public static final String MC_VERSION = "[1.12.2]";
 
     public static final String ProxyClientClass = "com.invadermonky.villagercontracts.proxy.ClientProxy";
@@ -39,7 +39,7 @@ public class VillagerContracts {
     public void preInit(FMLPreInitializationEvent event) {
         LogHelper.info("Starting " + MOD_NAME);
 
-        PacketHandler.init();
+        Packet.init();
 
         ConfigManager.sync(MOD_ID, net.minecraftforge.common.config.Config.Type.INSTANCE);
         ConfigHandler.ConfigChangeListener.syncConfigValues();

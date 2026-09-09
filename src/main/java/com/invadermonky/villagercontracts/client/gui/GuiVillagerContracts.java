@@ -22,9 +22,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Main GUI to navigate through all available professions and careers
- * It opens when you right-click in the air with the item
- */
+* No hace falta mencionar para que sirve esto ¿verdad?
+*/
 public class GuiVillagerContracts extends GuiScreen {
 
     private static final ResourceLocation GUI_TEXTURE = new ResourceLocation(
@@ -424,7 +423,7 @@ public class GuiVillagerContracts extends GuiScreen {
             return;
         }
 
-        com.invadermonky.villagercontracts.network.PacketHandler.INSTANCE.sendToServer(
+        com.invadermonky.villagercontracts.network.Packet.INSTANCE.sendToServer(
                 new com.invadermonky.villagercontracts.network.PacketApplyContractName(name));
 
         this.mc.player.closeScreen();

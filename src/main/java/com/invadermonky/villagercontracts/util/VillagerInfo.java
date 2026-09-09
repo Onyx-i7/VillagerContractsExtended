@@ -14,8 +14,7 @@ public class VillagerInfo {
         this.career = career;
     }
 
-    // Add a toString method to facilitate debugging and log reading when using
-    // dumpVillagerInfo
+    // Facilita la depuracion y lectura de los logs al usar dumpVillagerInfo
     @Override
     public String toString() {
         return String.format("VillagerInfo{identifier='%s', profession='%s', career='%s'}",

@@ -84,8 +84,6 @@ public class VillagerHelper {
 
     public static int getCareerId(VillagerCareer career) {
         try {
-            // Use reflection to obtain the race ID, as Forge 1.12.2 does not publicly
-            // expose this method
             Field idField = career.getClass().getDeclaredField("id");
             idField.setAccessible(true);
             return (int) idField.get(career);
@@ -101,11 +99,10 @@ public class VillagerHelper {
             EntityVillager villager = new EntityVillager(world);
             villager.setProfession(profession);
 
-            // Assign the careerId directly thanks to the Access Transformer
-            // (villagercontracts_at.cfg)
+            // Asigna el careerId directamente
             villager.careerId = getCareerId(career) + 1;
 
-            // Generate the list of businesses for the new profession/career
+            // Genera la lista de trades del nuevo nivel
             villager.populateBuyingList();
 
             return villager;

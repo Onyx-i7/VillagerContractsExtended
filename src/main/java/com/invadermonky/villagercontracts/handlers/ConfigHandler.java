@@ -42,7 +42,7 @@ public class ConfigHandler {
     }
 
     // ============================================
-    // BASIC SETTINGS
+    // OPCIONES BASICAS
     // ============================================
 
     @Comment(ReferencesVC.disableAnvilRenamingComment)
@@ -58,14 +58,14 @@ public class ConfigHandler {
     public static boolean consumeContractOnUse = true;
 
     // ============================================
-    // TRANSLATION SYSTEM
+    // SISTEMA DE TRADUCCIÓN
     // ============================================
 
     @Comment(ReferencesVC.useModTranslationsComment)
     public static boolean useModTranslations = true;
 
     // ============================================
-    // COST SETTINGS
+    // OPCIONES DE COSTO
     // ============================================
 
     @Comment(ReferencesVC.contractCostTypeComment)
@@ -82,7 +82,7 @@ public class ConfigHandler {
     public static String[] professionCosts = new String[0];
 
     // ============================================
-    // COOLDOWN SYSTEM
+    // COOLDOWN
     // ============================================
 
     @Comment(ReferencesVC.enableCooldownComment)
@@ -93,7 +93,8 @@ public class ConfigHandler {
     public static int cooldownTicks = 24000;
 
     // ============================================
-    // VILLAGER NAMING SYSTEM
+    // NOMBRAMIENTO DE LOS ALDEANOS
+    // TODO: Eliminar en una futura actualizacion
     // ============================================
 
     @Comment(ReferencesVC.autoNameVillagersComment)
@@ -103,7 +104,7 @@ public class ConfigHandler {
     public static boolean overrideCustomNames = false;
 
     // ============================================
-    // GAME STAGES INTEGRATION
+    // COMPATIBILIDAD CON GAMESTAGES
     // ============================================
 
     @Comment(ReferencesVC.enableGameStagesComment)
@@ -116,7 +117,7 @@ public class ConfigHandler {
     public static String[] professionGameStages = new String[0];
 
     // ============================================
-    // CONTRACTS AND BLACKLIST
+    // CONTRATOS Y LISTA NEGRA
     // ============================================
 
     @LangKey("config." + VillagerContracts.MOD_ID + ":validcontracts")
@@ -127,13 +128,13 @@ public class ConfigHandler {
     public static String[] entityBlacklist = ReferencesVC.defaultBlacklist;
 
     // ============================================
-    // PRIVATE FIELDS AND PATTERNS
+    // CAMPOS Y PATRONES
     // ============================================
 
     private static final Pattern CONTRACT_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+?)\\s*;\\s*(.+)$");
     private static final Pattern STAGE_PATTERN = Pattern.compile("^(.+?)\\s*=\\s*(.+)$");
 
-    // Format: profession_id=COST_TYPE:cost_value;amount
+    // Formato: profession_id=COST_TYPE:cost_value;amount
     private static final Pattern PROFESSION_COST_PATTERN = Pattern.compile(
             "^(.+?)\\s*=\\s*(ITEM|EXPERIENCE|XP)\\s*:\\s*(.+?)\\s*;\\s*(\\d+)$",
             Pattern.CASE_INSENSITIVE);
@@ -141,20 +142,16 @@ public class ConfigHandler {
     private static Item cachedCostItem = null;
     private static String cachedCostItemId = null;
 
-    // Track the last language used to detect language changes
+    // Esto lleva un registro del ultimo idioma utilizado para detectar cambios de idioma
     private static String lastLanguage = "";
 
-    // Cache for profession-specific game stages (profession_id -> stage_name)
+    // Cache para stages especificos de cada profesion (profession_id -> stage_name)
     private static final Map<String, String> PROFESSION_STAGE_CACHE = new HashMap<>();
 
-    // Cache for profession-specific costs (profession_id -> ProfessionCost)
+    // Cache para costos especificos de cada profesion (profession_id -> ProfessionCost)
     private static final Map<String, ProfessionCost> PROFESSION_COST_CACHE = new HashMap<>();
 
-    // ============================================
-    // PROFESSION COST CLASS
-    // ============================================
-
-    /** Represents a cost configuration for a specific professio **/
+    // Representa una configuracion de costos para una profesion especifica
     public static class ProfessionCost {
         public final ContractCostType type;
         public final String itemId;
@@ -168,7 +165,7 @@ public class ConfigHandler {
     }
 
     // ============================================
-    // PUBLIC STATIC METHODS
+    // METODOS STATIC PUBLICOS
     // ============================================
 
     public static Item getCostItem() {
@@ -191,10 +188,7 @@ public class ConfigHandler {
         return cachedCostItem;
     }
 
-    /**
-     * Gets an Item from its registry ID string
-     * Returns null if the item doesn't exist
-     */
+    // Saca un elemento a partir de su cadena de identificacion de registro devuelve null si el elemento no existe
     public static Item getItemFromId(String itemId) {
         if (itemId == null || itemId.isEmpty()) {
             return null;
@@ -209,10 +203,7 @@ public class ConfigHandler {
         }
     }
 
-    /**
-     * Gets the required Game Stage for a specific profession
-     * Returns the profession-specific stage if configured
-     */
+    // Obtiene el stage requerido para una profesion especifica esto devuelve el nivel específico de la profesión, si esta configurado
     public static String getRequiredStageForProfession(VillagerProfession profession) {
         if (profession == null || profession.getRegistryName() == null) {
             return requiredGameStage;
@@ -224,10 +215,7 @@ public class ConfigHandler {
         return specificStage != null ? specificStage : requiredGameStage;
     }
 
-    /**
-     * Gets the cost configuration for a specific profession.
-     * Returns the profession-specific cost if configured, otherwise the global cost.
-     */
+    // Obtiene la configuración de costos para una profesion especifica y devuelve el costo específico de la profesion, si está configurado sino devuelve el costo global
     public static ProfessionCost getCostForProfession(VillagerProfession profession) {
         if (profession == null || profession.getRegistryName() == null) {
             return new ProfessionCost(contractCostType, contractCostItem, contractCostAmount);
@@ -242,10 +230,6 @@ public class ConfigHandler {
 
         return new ProfessionCost(contractCostType, contractCostItem, contractCostAmount);
     }
-
-    // ============================================
-    // CONFIG CHANGE LISTENER
-    // ============================================
 
     @Mod.EventBusSubscriber(modid = VillagerContracts.MOD_ID)
     public static class ConfigChangeListener {
@@ -277,19 +261,19 @@ public class ConfigHandler {
                 autoDetectAllVillagers();
             }
 
-            // Parse profession-specific game stages
+            // Analiza las stages especificas de cada profesion
             parseProfessionGameStages();
 
-            // Parse profession-specific costs
+            // Analiza los costos especificos de cada profesion
             parseProfessionCosts();
 
-            // Update the last language tracker
+            // Actualiza el ultimo rastreador de idiomas
             lastLanguage = getCurrentLanguage();
         }
 
         /**
-         * Gets the current game language code.
-         * Returns empty string if called from server side.
+         * Saca el codigo de idioma actual del juego
+         * Esto devuelve una cadena vacia si se invoca desde el lado del servidor
          */
         @SideOnly(Side.CLIENT)
         private static String getCurrentLanguage() {
@@ -301,8 +285,8 @@ public class ConfigHandler {
         }
 
         /**
-         * Checks if the game language has changed and re-detects villagers if needed.
-         * Called from the GUI when it opens to ensure names are up-to-date.
+         * Verifica si ha cambiado el idioma del juego y vuelve a detectar a los aldeano
+         * Se invoca desde el GUI al abrirse para segurar que los nombres esten actualizados
          */
         @SideOnly(Side.CLIENT)
         public static void checkLanguageChange() {
@@ -329,15 +313,13 @@ public class ConfigHandler {
                     autoDetectAllVillagers();
                 }
 
-                // Re-parse profession-specific game stages and costs
+                // Vuelve a analizar las stages y los costos especificos de cada profesion
                 parseProfessionGameStages();
                 parseProfessionCosts();
             }
         }
 
-        /**
-         * Parses the profession-specific game stages from config
-         */
+        // Analiza las stages especificas de cada profesion a partir de la configuracion
         private static void parseProfessionGameStages() {
             PROFESSION_STAGE_CACHE.clear();
 
@@ -358,9 +340,7 @@ public class ConfigHandler {
             LogHelper.info("Loaded " + PROFESSION_STAGE_CACHE.size() + " profession-specific game stages.");
         }
 
-        /**
-         * Parses the profession-specific costs from config
-         */
+        // Analiza los costos especificos de cada profesion a partir de la configuración
         private static void parseProfessionCosts() {
             PROFESSION_COST_CACHE.clear();
 
@@ -445,9 +425,7 @@ public class ConfigHandler {
             }
         }
 
-        /**
-         * Automatically detects all professions and careers registered by other mods
-         */
+        // Detecta automaticamente todas las profesiones registradas por otros mods
         public static void autoDetectAllVillagers() {
             Map<String, Integer> nameUsageCount = new HashMap<>();
 
@@ -492,9 +470,7 @@ public class ConfigHandler {
             LogHelper.info("Auto-detected " + EventHandler.contractMap.size() + " villager contracts in total.");
         }
 
-        /**
-         * Attempts to get the localized name of a career/profession
-         */
+        // Intenta obtener el nombre traducido de una profesion
         private static String getLocalizedOrPrettyName(VillagerCareer career, VillagerProfession profession) {
             String careerName = VillagerHelper.getCareerName(career);
 
@@ -523,16 +499,14 @@ public class ConfigHandler {
                         return translated;
                     }
                 } catch (Exception e) {
-                    // Ignore and try next key
+                    // Ignorar e intentar con la siguiente
                 }
             }
 
             return prettifyName(careerName);
         }
 
-        /**
-         * Converts a name like "weapon_smith" to "Weapon Smith"
-         */
+        // Convierte un nombre como weapon_smith en Weapon Smith
         private static String prettifyName(String rawName) {
             if (rawName == null || rawName.isEmpty())
                 return rawName;

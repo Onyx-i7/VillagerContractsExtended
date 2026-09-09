@@ -133,7 +133,7 @@ public class ReferencesVC {
             "Professions not listed here will use the global 'requiredGameStage'\n" +
             "This setting is ignored if enableGameStages is false";
 
-        // Possibly buggy
+        // Esta funcion posiblemente tenga errores
         public static final String professionCostsComment =
                 "Specific costs for individual professions\n" +
                         "Format: 'profession_id=COST_TYPE:cost_value;amount'\n" +

@@ -5,9 +5,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
-/**
- * Helper class for managing villager NBT data related to the contract system.
- */
+// Clase para administrar los datos NBT de los aldeanos
 public class VillagerDataHelper {
 
     private static final String NBT_LAST_CONTRACT_TIME = "vc_last_contract_time";
