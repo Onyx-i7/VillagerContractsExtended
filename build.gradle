@@ -124,9 +124,9 @@ dependencies {
     }
 
     // Game Stages
-    compileOnly rfg.deobf('curse.maven:game-stages-268655:2951840')
+    implementation rfg.deobf('curse.maven:game-stages-268655:2951840')
     // Bookshelf
-    compileOnly rfg.deobf('curse.maven:bookshelf-228525:2836960')
+    implementation rfg.deobf('curse.maven:bookshelf-228525:2836960')
 }
 
 // Adds Access Transformer files to tasks

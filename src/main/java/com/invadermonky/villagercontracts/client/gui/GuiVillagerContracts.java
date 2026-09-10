@@ -1,9 +1,11 @@
 package com.invadermonky.villagercontracts.client.gui;
 
 import com.invadermonky.villagercontracts.VillagerContracts;
+import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
+import com.invadermonky.villagercontracts.network.PacketApplyContractName;
 import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiScreen;
@@ -43,14 +45,27 @@ public class GuiVillagerContracts extends GuiScreen {
 
     public GuiVillagerContracts() {
         ConfigHandler.ConfigChangeListener.checkLanguageChange();
-        rebuildLists();
+        // rebuildLists(); Esta mierda explota en este lugar al intentarle meterle la compatibilidad con Gamestage
     }
 
+    // Bugeado pero mas o menos funcional
     private void rebuildLists() {
         professionList.clear();
         Map<String, List<VillagerInfo>> grouped = new TreeMap<>();
+        EntityPlayer player = this.mc.player;
+        boolean isGameStagesEnabled = ConfigHandler.enableGameStages && com.invadermonky.villagercontracts.compat.GameStageIntegration.isAvailable();
 
         for (VillagerInfo info : EventHandler.contractMap.values()) {
+            if (isGameStagesEnabled && player != null) {
+                String requiredStage = ConfigHandler.getRequiredStageForProfession(info.profession);
+
+                if (requiredStage != null && !requiredStage.isEmpty()) {
+                    if (!GameStageIntegration.hasRequiredStage(player, requiredStage)) {
+                        continue;
+                    }
+                }
+            }
+
             String modId = extractModId(info);
             grouped.computeIfAbsent(modId, k -> new ArrayList<>()).add(info);
         }
@@ -71,6 +86,7 @@ public class GuiVillagerContracts extends GuiScreen {
     @Override
     public void initGui() {
         super.initGui();
+        rebuildLists();
         Keyboard.enableRepeatEvents(true);
 
         int xCenter = this.width / 2;
@@ -423,8 +439,7 @@ public class GuiVillagerContracts extends GuiScreen {
             return;
         }
 
-        com.invadermonky.villagercontracts.network.Packet.INSTANCE.sendToServer(
-                new com.invadermonky.villagercontracts.network.PacketApplyContractName(name));
+        VillagerContracts.NETWORK.sendToServer(new PacketApplyContractName(name));
 
         this.mc.player.closeScreen();
     }
