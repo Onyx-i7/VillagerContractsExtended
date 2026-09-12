@@ -3,19 +3,19 @@ package com.invadermonky.villagercontracts.util;
 public class ReferencesVC {
 
         public static final String[] defaultContracts = new String[] {
-                        "Farmer=minecraft:farmer;farmer",
-                        "Fisherman=minecraft:farmer;fisherman",
-                        "Shepherd=minecraft:farmer;shepherd",
-                        "Fletcher=minecraft:farmer;fletcher",
-                        "Librarian=minecraft:librarian;librarian",
-                        "Cartographer=minecraft:librarian;cartographer",
-                        "Cleric=minecraft:priest;cleric",
-                        "Armorer=minecraft:blacksmith;armor",
-                        "Weapon Smith=minecraft:blacksmith;weapon",
-                        "Tool Smith=minecraft:blacksmith;tool",
-                        "Butcher=minecraft:butcher;butcher",
-                        "Leatherworker=minecraft:butcher;leather",
-                        "Nitwit=minecraft:nitwit;nitwit"
+                "Farmer=minecraft:farmer;farmer",
+                "Fisherman=minecraft:farmer;fisherman",
+                "Shepherd=minecraft:farmer;shepherd",
+                "Fletcher=minecraft:farmer;fletcher",
+                "Librarian=minecraft:librarian;librarian",
+                "Cartographer=minecraft:librarian;cartographer",
+                "Cleric=minecraft:priest;cleric",
+                "Armorer=minecraft:blacksmith;armor",
+                "Weapon Smith=minecraft:blacksmith;weapon",
+                "Tool Smith=minecraft:blacksmith;tool",
+                "Butcher=minecraft:butcher;butcher",
+                "Leatherworker=minecraft:butcher;leather",
+                "Nitwit=minecraft:nitwit;nitwit"
         };
 
         public static final String[] defaultBlacklist = new String[] {

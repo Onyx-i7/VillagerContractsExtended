@@ -168,6 +168,39 @@ public class ConfigHandler {
     // METODOS STATIC PUBLICOS
     // ============================================
 
+    public static void parseConfigs() {
+        // Limpia y procesa la cache de Gamestages
+        PROFESSION_STAGE_CACHE.clear();
+        for (String entry : professionGameStages) {
+            if (entry == null || entry.isEmpty()) continue;
+            Matcher matcher = STAGE_PATTERN.matcher(entry);
+            if (matcher.matches()) {
+                String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                String stageName = matcher.group(2).trim();
+                PROFESSION_STAGE_CACHE.put(professionId, stageName);
+            }
+        }
+
+        // limpia y procesa la cache de los costos
+        PROFESSION_COST_CACHE.clear();
+        for (String entry : professionCosts) {
+            if (entry == null || entry.isEmpty()) continue;
+            Matcher matcher = PROFESSION_COST_PATTERN.matcher(entry);
+            if (matcher.matches()) {
+                String professionId = matcher.group(1).trim().toLowerCase(Locale.ROOT);
+                String costTypeStr = matcher.group(2).trim().toUpperCase(Locale.ROOT);
+                String costValue = matcher.group(3).trim();
+                int amount = Integer.parseInt(matcher.group(4).trim());
+
+                ContractCostType type = ContractCostType.NONE;
+                if (costTypeStr.equals("ITEM")) type = ContractCostType.ITEM;
+                else if (costTypeStr.equals("EXPERIENCE") || costTypeStr.equals("XP")) type = ContractCostType.EXPERIENCE;
+
+                PROFESSION_COST_CACHE.put(professionId, new ProfessionCost(type, costValue, amount));
+            }
+        }
+    }
+
     public static Item getCostItem() {
         if (contractCostType != ContractCostType.ITEM) {
             return null;
@@ -188,7 +221,8 @@ public class ConfigHandler {
         return cachedCostItem;
     }
 
-    // Saca un elemento a partir de su cadena de identificacion de registro devuelve null si el elemento no existe
+    // Saca un elemento a partir de su cadena de identificacion de registro
+    // devuelve null si el elemento no existe
     public static Item getItemFromId(String itemId) {
         if (itemId == null || itemId.isEmpty()) {
             return null;
@@ -203,19 +237,30 @@ public class ConfigHandler {
         }
     }
 
-    // Obtiene el stage requerido para una profesion especifica esto devuelve el nivel específico de la profesión, si esta configurado
+    // Obtiene el stage requerido para una profesion especifica esto devuelve el nivel
+    // específico de la profesión, si esta configurado
     public static String getRequiredStageForProfession(VillagerProfession profession) {
+        if (!enableGameStages) {
+            return ""; // Si el sistema está apagado, ninguna profesion pide stage
+        }
+
         if (profession == null || profession.getRegistryName() == null) {
-            return requiredGameStage;
+            return "";
         }
 
         String professionId = profession.getRegistryName().toString().toLowerCase(Locale.ROOT);
-        String specificStage = PROFESSION_STAGE_CACHE.get(professionId);
 
-        return specificStage != null ? specificStage : requiredGameStage;
+        if (PROFESSION_STAGE_CACHE.containsKey(professionId)) {
+            return PROFESSION_STAGE_CACHE.get(professionId);
+        }
+
+        // Si no está en la lista especifica, devuelve vacío "" (osea es libre)
+        return "";
     }
 
-    // Obtiene la configuración de costos para una profesion especifica y devuelve el costo específico de la profesion, si está configurado sino devuelve el costo global
+    // Obtiene la configuración de costos para una profesion especifica
+    // devuelve el costo específico de la profesion, si está configurado
+    // sino devuelve el costo global
     public static ProfessionCost getCostForProfession(VillagerProfession profession) {
         if (profession == null || profession.getRegistryName() == null) {
             return new ProfessionCost(contractCostType, contractCostItem, contractCostAmount);
@@ -266,6 +311,9 @@ public class ConfigHandler {
 
             // Analiza los costos especificos de cada profesion
             parseProfessionCosts();
+
+            // Actualiza el cache
+            parseConfigs();
 
             // Actualiza el ultimo rastreador de idiomas
             lastLanguage = getCurrentLanguage();

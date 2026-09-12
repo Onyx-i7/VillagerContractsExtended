@@ -47,7 +47,7 @@ Thanks to the new detection system, this mod is **immediately compatible with an
 * Ice and Fire: ROTH Edition
 * Thaumcraft
 * Immersive Engineering
-* Gamestage (Compatibility requested by small_raman88 and added in version 1.3.3)
+* GameStage
 * *And any other mod that registers villagers through Forge*
 
 ---
@@ -69,7 +69,7 @@ The configuration file allows you to adjust the mod's behavior to suit the needs
 ## Future Roadmap
 
 * [ ] Port to future versions such as 1.16 or 1.21
-* [ ] Create the GUI texture
+* [x] Create the GUI texture
 * [x] Add more features, such as the experience cost of hiring a villager
 * [ ] And other features that will be added to this list
 

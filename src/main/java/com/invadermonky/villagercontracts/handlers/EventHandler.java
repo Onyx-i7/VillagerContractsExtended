@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 public class EventHandler {
@@ -42,15 +41,6 @@ public class EventHandler {
     public static Set<String> entityBlacklist = new HashSet<>();
 
     private static Field buyingListField = null;
-    private static final Random random = new Random();
-
-    private static final String[] COOLDOWN_MESSAGES = {
-            "message.villagercontracts.cooldown_slavery",
-            "message.villagercontracts.cooldown_rest",
-            "message.villagercontracts.cooldown_tired",
-            "message.villagercontracts.cooldown_union",
-            "message.villagercontracts.cooldown_boss"
-    };
 
     private static Field getBuyingListField() {
         if (buyingListField == null) {
@@ -169,22 +159,6 @@ public class EventHandler {
                     }
                 }
 
-                if (ConfigHandler.enableCooldown
-                        && VillagerDataHelper.isOnCooldown(villager, currentTime, ConfigHandler.cooldownTicks)) {
-                    long remaining = VillagerDataHelper.getRemainingCooldown(villager, currentTime,
-                            ConfigHandler.cooldownTicks);
-                    String formattedTime = VillagerDataHelper.formatCooldownTime(remaining);
-
-                    String messageKey = COOLDOWN_MESSAGES[random.nextInt(COOLDOWN_MESSAGES.length)];
-                    TextComponentTranslation msg = new TextComponentTranslation(messageKey, formattedTime);
-                    msg.getStyle().setColor(TextFormatting.RED);
-                    player.sendMessage(msg);
-
-                    villager.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
-                    event.setCanceled(true);
-                    return;
-                }
-
                 if (!canPayCost(player, villagerInfo.profession)) {
                     TextComponentTranslation msg = new TextComponentTranslation(
                             "message.villagercontracts.insufficient_funds");
@@ -228,7 +202,7 @@ public class EventHandler {
                     heldItem.shrink(1);
                 }
             } else {
-                ((EntityVillager) target).playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
+                target.playSound(SoundEvents.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
             event.setCanceled(true);
         }
