@@ -45,7 +45,7 @@ minecraft {
     mcpMappingVersion = '39'
     
     // Set username here, the UUID will be looked up automatically
-    username = 'Invadermonky'
+    username = '0xNull'
     
     // Add any additional tweaker classes here
     // extraTweakClasses.add('org.spongepowered.asm.launch.MixinTweaker')

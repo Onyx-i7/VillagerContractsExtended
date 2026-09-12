@@ -3,7 +3,6 @@ package com.invadermonky.villagercontracts.handlers;
 import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.*;
 import com.invadermonky.villagercontracts.init.RegistryVC;
-import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiRepair;
@@ -140,9 +139,8 @@ public class EventHandler {
             if (contractMap.containsKey(contractName)) {
                 VillagerInfo villagerInfo = contractMap.get(contractName);
                 EntityVillager villager = (EntityVillager) target;
-                long currentTime = world.getTotalWorldTime();
 
-                // Check Game Stages requirement (profession-specific or global)
+                // Verifica el requisito de las stages (especifica de la profesión o global)
                 if (ConfigHandler.enableGameStages && GameStageIntegration.isAvailable()) {
                     String requiredStage = ConfigHandler.getRequiredStageForProfession(villagerInfo.profession);
                     
@@ -174,18 +172,6 @@ public class EventHandler {
                 villager.careerLevel = 1;
                 clearVillagerTrades(villager);
                 villager.populateBuyingList();
-
-                if (ConfigHandler.autoNameVillagers) {
-                    boolean shouldRename = !villager.hasCustomName() || ConfigHandler.overrideCustomNames;
-                    if (shouldRename) {
-                        villager.setCustomNameTag(villagerInfo.identifier);
-                        villager.setAlwaysRenderNameTag(true);
-                    }
-                }
-
-                if (ConfigHandler.enableCooldown) {
-                    VillagerDataHelper.setLastContractTime(villager, currentTime);
-                }
 
                 villager.playSound(SoundEvents.ENTITY_VILLAGER_YES, 1.0f, 1.0f);
 

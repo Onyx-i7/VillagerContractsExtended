@@ -19,7 +19,7 @@ import java.util.Locale;
 /**
  * Esto es un paquete enviado desde el cliente al servidor para asignar un nombre de contrato
  * Esto es necesario porque setStackDisplayName() solo funciona del lado del cliente
- * (Esto posiblemente no funciona como yo lo planteo)
+ * (Esto posiblemente no funciona como yo lo planteo asi que puede ser eliminado)
  */
 public class PacketApplyContractName implements IMessage {
     private String contractName;

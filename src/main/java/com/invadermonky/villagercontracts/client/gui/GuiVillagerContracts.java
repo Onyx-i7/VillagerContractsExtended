@@ -19,13 +19,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 import java.io.IOException;
 import java.util.*;
 
 /**
-* No hace falta mencionar para que sirve esto ¿verdad?
-*/
+ * No hace falta mencionar para que sirve esto ¿verdad?
+ */
 public class GuiVillagerContracts extends GuiScreen {
 
     private static final ResourceLocation GUI_TEXTURE = new ResourceLocation(
@@ -42,6 +43,11 @@ public class GuiVillagerContracts extends GuiScreen {
     private int careerScrollOffset = 0;
     private long lastCareerClickTime = 0;
     private int lastCareerClickIndex = -1;
+    private final int listHeight = 120;
+    private final int scrollBarWidth = 6;
+    private final int scrollTrackHeight = listHeight;
+    private boolean isDraggingProfessionScrollBar = false;
+    private boolean isDraggingCareerScrollBar = false;
 
     public GuiVillagerContracts() {
         ConfigHandler.ConfigChangeListener.checkLanguageChange();
@@ -169,6 +175,10 @@ public class GuiVillagerContracts extends GuiScreen {
             String display = entry.modId + " (" + entry.careers.size() + ")";
             drawString(this.fontRenderer, display, x, entryY, 0xFFFFFF);
         }
+
+        // Dibuja la barra de scroll de las profesiones
+        int scrollTrackX = x + 132;
+        drawScrollBar(scrollTrackX, y, filtered.size(), professionScrollOffset, isDraggingProfessionScrollBar);
     }
 
     private void drawCareerList(int x, int y, int mouseX, int mouseY) {
@@ -196,6 +206,30 @@ public class GuiVillagerContracts extends GuiScreen {
             }
 
             drawString(this.fontRenderer, entry.displayName, x, entryY, 0xFFFFFF);
+        }
+
+        // Dibuja la barra de desplazamiento de carreras
+        int scrollTrackX = x + 132;
+        drawScrollBar(scrollTrackX, y, careerList.size(), careerScrollOffset, isDraggingCareerScrollBar);
+    }
+
+    // Dibuja el carril y la barra de desplazamiento (thumb) de una lista
+    private void drawScrollBar(int x, int y, int totalItems, int currentOffset, boolean isDragging) {
+        // Solo dibuja la barra de desplazamiento si la lista supera la cantidad maxima visible
+        if (totalItems > maxVisibleEntries) {
+            // Dibuja el fondo del carril (track) en gris oscuro ya que estoy perezoso para hacerle una textura
+            drawRect(x, y, x + scrollBarWidth, y + scrollTrackHeight, 0xFF000000);
+
+            // Calcula la altura de la barra respecto a la cantidad de elementos
+            int thumbHeight = Math.max(10, (maxVisibleEntries * scrollTrackHeight) / totalItems);
+            // Calcula cuantas entradas se pueden scrollear en total
+            int maxOffset = totalItems - maxVisibleEntries;
+            // Calcula la posicion Y de la barra basada en el offset actual
+            int thumbY = y + (currentOffset * (scrollTrackHeight - thumbHeight)) / maxOffset;
+
+            // El color cambia si el jugador esta arrastrando la barra o pasando el mouse por encima
+            int thumbColor = isDragging ? 0xFFFFFFFF : 0xFF808080;
+            drawRect(x, thumbY, x + scrollBarWidth, thumbY + thumbHeight, thumbColor);
         }
     }
 
@@ -331,14 +365,38 @@ public class GuiVillagerContracts extends GuiScreen {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         searchField.mouseClicked(mouseX, mouseY, mouseButton);
 
-        if (mouseButton == 0) {
-            int xCenter = this.width / 2;
-            int yCenter = this.height / 2;
+        int xCenter = this.width / 2;
+        int yCenter = this.height / 2;
+        int listStartY = yCenter - 60;
 
+        if (mouseButton == 0) {
             List<ProfessionEntry> filtered = getFilteredProfessions();
 
-            if (mouseX >= xCenter - 135 && mouseX <= xCenter - 5 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
-                int relativeY = mouseY - (yCenter - 60);
+            // Calcula las posiciones X de las barras de desplazamiento
+            int profScrollBarX = xCenter - 135 + 132;
+            int careerScrollBarX = xCenter + 5 + 132;
+
+            // Verifica si el clic fue en la barra de profesiones (solo si hay suficientes elementos para mostrarla)
+            if (filtered.size() > maxVisibleEntries &&
+                    mouseX >= profScrollBarX && mouseX <= profScrollBarX + scrollBarWidth &&
+                    mouseY >= listStartY && mouseY <= listStartY + scrollTrackHeight) {
+                isDraggingProfessionScrollBar = true;
+                updateScrollFromMouse(mouseY, filtered.size(), professionScrollOffset, true);
+                return;
+            }
+
+            // Verifica si el clic fue en la barra de carreras (solo si hay suficientes elementos para mostrarla)
+            if (selectedProfessionIndex >= 0 && careerList.size() > maxVisibleEntries &&
+                    mouseX >= careerScrollBarX && mouseX <= careerScrollBarX + scrollBarWidth &&
+                    mouseY >= listStartY && mouseY <= listStartY + scrollTrackHeight) {
+                isDraggingCareerScrollBar = true;
+                updateScrollFromMouse(mouseY, careerList.size(), careerScrollOffset, false);
+                return;
+            }
+
+            // Logica original de clics en las listas
+            if (mouseX >= xCenter - 135 && mouseX <= xCenter - 5 && mouseY >= listStartY && mouseY <= yCenter + 60) {
+                int relativeY = mouseY - listStartY;
                 int clickedIndex = professionScrollOffset + relativeY / 16;
 
                 if (clickedIndex >= 0 && clickedIndex < filtered.size()) {
@@ -351,8 +409,8 @@ public class GuiVillagerContracts extends GuiScreen {
                 }
             }
 
-            if (mouseX >= xCenter + 5 && mouseX <= xCenter + 135 && mouseY >= yCenter - 60 && mouseY <= yCenter + 60) {
-                int relativeY = mouseY - (yCenter - 60);
+            if (mouseX >= xCenter + 5 && mouseX <= xCenter + 135 && mouseY >= listStartY && mouseY <= yCenter + 60) {
+                int relativeY = mouseY - listStartY;
 
                 int clickedIndex = careerScrollOffset + relativeY / 16;
                 if (clickedIndex >= 0 && clickedIndex < careerList.size()) {
@@ -371,14 +429,59 @@ public class GuiVillagerContracts extends GuiScreen {
     }
 
     @Override
+    protected void mouseReleased(int mouseX, int mouseY, int state) {
+        super.mouseReleased(mouseX, mouseY, state);
+        // Libera el estado de arrastre al soltar el boton del raton
+        if (state == 0) {
+            isDraggingProfessionScrollBar = false;
+            isDraggingCareerScrollBar = false;
+        }
+    }
+
+    @Override
+    protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+        // Actualiza el scroll mientras el jugador arrastra el mouse sobre la barra de scroll
+        if (clickedMouseButton == 0) {
+            if (isDraggingProfessionScrollBar) {
+                updateScrollFromMouse(mouseY, getFilteredProfessions().size(), professionScrollOffset, true);
+            } else if (isDraggingCareerScrollBar) {
+                updateScrollFromMouse(mouseY, careerList.size(), careerScrollOffset, false);
+            }
+        }
+    }
+
+    // Calcula y actualiza el offset de scroll basandose en la posicion Y del mouse
+    private void updateScrollFromMouse(int mouseY, int totalItems, int currentOffset, boolean isProfessionList) {
+        int yCenter = this.height / 2;
+        int listStartY = yCenter - 60;
+        // Calcula la posicion relativa del mouse dentro del carril
+        int relativeY = mouseY - listStartY;
+        // Altura maxima utilizable (restando la altura minima del thumb)
+        int usableHeight = scrollTrackHeight - Math.max(10, (maxVisibleEntries * scrollTrackHeight) / totalItems);
+        // Offset maximo permitido
+        int maxOffset = Math.max(0, totalItems - maxVisibleEntries);
+
+        // Calcula el nuevo offset y lo restringe a los limites validos
+        int newOffset = (relativeY * maxOffset) / usableHeight;
+        newOffset = Math.max(0, Math.min(maxOffset, newOffset));
+
+        if (isProfessionList) {
+            professionScrollOffset = newOffset;
+        } else {
+            careerScrollOffset = newOffset;
+        }
+    }
+
+    @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
-        int scroll = org.lwjgl.input.Mouse.getEventDWheel();
+        int scroll = Mouse.getEventDWheel();
         if (scroll != 0) {
             int xCenter = this.width / 2;
             int yCenter = this.height / 2;
-            int mouseX = org.lwjgl.input.Mouse.getEventX() * this.width / this.mc.displayWidth;
-            int mouseY = this.height - org.lwjgl.input.Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
+            int mouseX = Mouse.getEventX() * this.width / this.mc.displayWidth;
+            int mouseY = this.height - Mouse.getEventY() * this.height / this.mc.displayHeight - 1;
 
             List<ProfessionEntry> filtered = getFilteredProfessions();
 

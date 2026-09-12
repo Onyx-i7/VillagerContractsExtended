@@ -39,7 +39,7 @@ public class ItemVillagerContract extends Item {
 
         if (worldIn.isRemote && !playerIn.isSneaking()) {
             RayTraceResult ray = this.rayTrace(worldIn, playerIn, false);
-            if (ray == null || ray.typeOfHit != RayTraceResult.Type.ENTITY) {
+            if (ray.typeOfHit != RayTraceResult.Type.ENTITY) {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiVillagerContracts());
             }
         }

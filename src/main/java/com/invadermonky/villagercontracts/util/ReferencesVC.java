@@ -63,31 +63,6 @@ public class ReferencesVC {
                         "Examples: 'minecraft:diamond', 'minecraft:emerald', 'botania:manasteel_ingot'\n" +
                         "Default: minecraft:emerald";
 
-        public static final String enableCooldownComment = "When enabled, villagers will have a cooldown period after a contract is applied.\n"
-                        +
-                        "During the cooldown, you cannot apply another contract to the same villager.\n" +
-                        "This prevents exploiting villagers by rapidly changing their professions.\n" +
-                        "Default: false";
-
-        public static final String cooldownTicksComment = "The cooldown duration in ticks after applying a contract to a villager.\n"
-                        +
-                        "20 ticks = 1 second. 1200 ticks = 1 minute. 72000 ticks = 1 hour. 1728000 ticks = 1 day.\n" +
-                        "This setting is ignored if enableCooldown is false.\n" +
-                        "Default: 24000 (20 minutes real time)";
-
-        public static final String autoNameVillagersComment = "When enabled, villagers will be automatically renamed when a contract is applied.\n"
-                        +
-                        "The name will match the contract identifier (which can be customized in the config).\n" +
-                        "Example: Applying a 'Librarian' contract will rename the villager to 'Librarian'.\n" +
-                        "Default: false";
-
-        public static final String overrideCustomNamesComment = "When enabled, the contract will override any custom name the villager already has\n"
-                        +
-                        "(including names set with name tags).\n" +
-                        "When disabled, villagers with custom names will keep their original names.\n" +
-                        "This setting is ignored if autoNameVillagers is false.\n" +
-                        "Default: false";
-
         public static final String validContractsComment = "List of valid contract names and their associated villager careers.\n"
                         +
                         "Format:  name=profession;career\n" +

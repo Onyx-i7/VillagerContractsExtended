@@ -82,28 +82,6 @@ public class ConfigHandler {
     public static String[] professionCosts = new String[0];
 
     // ============================================
-    // COOLDOWN
-    // ============================================
-
-    @Comment(ReferencesVC.enableCooldownComment)
-    public static boolean enableCooldown = false;
-
-    @Comment(ReferencesVC.cooldownTicksComment)
-    @RangeInt(min = 100, max = 1728000)
-    public static int cooldownTicks = 24000;
-
-    // ============================================
-    // NOMBRAMIENTO DE LOS ALDEANOS
-    // TODO: Eliminar en una futura actualizacion
-    // ============================================
-
-    @Comment(ReferencesVC.autoNameVillagersComment)
-    public static boolean autoNameVillagers = true;
-
-    @Comment(ReferencesVC.overrideCustomNamesComment)
-    public static boolean overrideCustomNames = false;
-
-    // ============================================
     // COMPATIBILIDAD CON GAMESTAGES
     // ============================================
 

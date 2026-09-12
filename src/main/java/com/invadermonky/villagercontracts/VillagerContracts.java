@@ -2,7 +2,6 @@ package com.invadermonky.villagercontracts;
 
 import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
-import com.invadermonky.villagercontracts.network.PacketApplyContractName;
 import com.invadermonky.villagercontracts.proxy.CommonProxy;
 import com.invadermonky.villagercontracts.util.LogHelper;
 import net.minecraftforge.common.config.ConfigManager;
@@ -13,7 +12,6 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
 
 @Mod(
         modid = VillagerContracts.MOD_ID,
@@ -44,8 +42,6 @@ public class VillagerContracts {
     public void preInit(FMLPreInitializationEvent event) {
         LogHelper.info("Starting " + MOD_NAME);
 
-        registerNetworkPackets();
-
         ConfigManager.sync(MOD_ID, net.minecraftforge.common.config.Config.Type.INSTANCE);
         ConfigHandler.ConfigChangeListener.syncConfigValues();
 
@@ -65,9 +61,5 @@ public class VillagerContracts {
     public void postInit(FMLPostInitializationEvent event) {
         proxy.postInit(event);
         LogHelper.debug("Finished postInit phase.");
-    }
-
-    private void registerNetworkPackets() {
-        NETWORK.registerMessage(PacketApplyContractName.Handler.class, PacketApplyContractName.class, 0, Side.SERVER);
     }
 }
