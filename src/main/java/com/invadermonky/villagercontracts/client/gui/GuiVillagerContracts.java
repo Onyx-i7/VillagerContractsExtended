@@ -5,7 +5,6 @@ import com.invadermonky.villagercontracts.compat.GameStageIntegration;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler;
 import com.invadermonky.villagercontracts.handlers.ConfigHandler.ContractCostType;
 import com.invadermonky.villagercontracts.handlers.EventHandler;
-import com.invadermonky.villagercontracts.network.PacketApplyContractName;
 import com.invadermonky.villagercontracts.util.VillagerDataHelper;
 import com.invadermonky.villagercontracts.util.VillagerInfo;
 import net.minecraft.client.gui.GuiScreen;
@@ -541,8 +540,6 @@ public class GuiVillagerContracts extends GuiScreen {
                     TextFormatting.RED + I18n.format("gui.villagercontracts.no_contract")));
             return;
         }
-
-        VillagerContracts.NETWORK.sendToServer(new PacketApplyContractName(name));
 
         this.mc.player.closeScreen();
     }
