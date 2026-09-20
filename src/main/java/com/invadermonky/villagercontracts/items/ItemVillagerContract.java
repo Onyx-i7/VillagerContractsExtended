@@ -36,17 +36,20 @@ public class ItemVillagerContract extends Item {
     @Override
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
         ItemStack stack = playerIn.getHeldItem(handIn);
-
         if (worldIn.isRemote && !playerIn.isSneaking()) {
             RayTraceResult ray = this.rayTrace(worldIn, playerIn, false);
-            if (ray != null || ray.typeOfHit != RayTraceResult.Type.ENTITY) {
+            if (ray == null || ray.typeOfHit == RayTraceResult.Type.MISS || ray.typeOfHit == RayTraceResult.Type.BLOCK) {
                 Minecraft.getMinecraft().displayGuiScreen(new GuiVillagerContracts());
             }
         }
-
         return new ActionResult<>(EnumActionResult.SUCCESS, stack);
     }
 
+    @Override
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
+        return true;
+    }
+    
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
